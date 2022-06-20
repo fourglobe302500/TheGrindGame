@@ -19,6 +19,7 @@ module.exports = {
     },
     port: 8080,
   },
+  plugins: [new MiniCssExtractPlugin()],
   module: {
     rules: [
       {
