@@ -11,13 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v3
-      - uses: borales/actions-yarn@v3
+      - name: GitHub Action for Yarn
+        uses: Borales/actions-yarn@v3.0.0
         with:
           cmd: install
-      - uses: borales/actions-yarn@v3.0.0
+      - name: GitHub Action for Yarn
+        uses: Borales/actions-yarn@v3.0.0
         with:
           cmd: build
-      - uses: amondnet/vercel-action@v20
+      - name: Vercel Action
+        uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }} # Required
           vercel-args: '--prod' #Optional
