@@ -1,0 +1,32 @@
+{
+  "private": true,
+  "scripts": {
+    "postinstall": "dotnet tool restore",
+    "start": "dotnet fable watch src --run webpack-dev-server",
+    "build": "dotnet fable src && webpack"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.18.2",
+    "@babel/preset-env": "^7.8.4",
+    "babel-loader": "^8.2.5",
+    "core-js": "^3.6.4",
+    "css-loader": "^6.7.1",
+    "fable-compiler": "^2.4.13",
+    "fable-loader": "^2.1.8",
+    "fable-utils": "^1.2.0",
+    "mini-css-extract-plugin": "^2.6.0",
+    "node-sass": "^7.0.1",
+    "remotedev": "^0.2.9",
+    "sass": "^1.52.3",
+    "sass-loader": "^13.0.0",
+    "style-loader": "^3.3.1",
+    "webpack": "^5.0.0",
+    "webpack-cli": "^4.9.0",
+    "webpack-dev-server": "^4.0.0"
+  },
+  "version": "1.0.0",
+  "dependencies": {
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0"
+  }
+}

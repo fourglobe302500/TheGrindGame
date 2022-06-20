@@ -1,0 +1,16 @@
+{
+  "save": "test",
+  "inventory": {
+    "inventory": [
+      {
+        "item": "Stick",
+        "count": 3
+      },
+      {
+        "item": "Pebble",
+        "count": 3
+      }
+    ],
+    "cap": 5
+  }
+}
