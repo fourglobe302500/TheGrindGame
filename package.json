@@ -2,7 +2,7 @@
   "name": "the-grind-game",
   "license": "MIT",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "scripts": {
     "postinstall": "dotnet tool restore",
     "start": "dotnet fable watch src --run webpack-dev-server",

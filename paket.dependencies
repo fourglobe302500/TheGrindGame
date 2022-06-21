@@ -1,9 +1,9 @@
 source https://api.nuget.org/v3/index.json
 
-nuget Fable.Elmish.Debugger
+nuget Fable.Elmish.Debugger 4.0.0-beta-1
 nuget Fable.SimpleJson
 nuget FSharp.Core
 nuget Fable.Browser.Dom
 nuget Fable.Core 
-nuget Fable.Elmish.React
+nuget Fable.Elmish.React 4.0.0-beta-2
 nuget Fable.React 

@@ -11,7 +11,10 @@ open Fable.Core.JsInterop
 open Browser
 open Fable.Import
 open Fable.SimpleJson
+
+#if DEBUG
 open Elmish.Debug
+#endif
 
 open TGG
 
@@ -111,6 +114,6 @@ let view model (dispatch: Dispatch<Msg>) =
 Program.mkProgram init update view
 |> Program.withReactBatched "elmish-app"
 #if DEBUG
-|> Program.withDebugger
+// |> Program.withDebugger
 #endif
 |> Program.run
