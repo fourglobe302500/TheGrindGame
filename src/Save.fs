@@ -17,6 +17,7 @@ open Fable.Import
 open Browser.Dom
 open Browser.Types
 open TGG.Types
+open Elmish.ReactNative.Components
 
 let [<Global>] console: JS.Console = jsNative
 
@@ -31,18 +32,14 @@ let handleDrop (e: Browser.Types.DragEvent) onload =
     fr.readAsText file
     Success ()
 
-let init (): SaveContext.Model = 
-  { AskSave = false
-    InputValue = ""
-    Save = false
-    FileOver = false }
+let init = SaveContext.init
 
 type Msg = SaveContext.Msg
 type Model = SaveContext.Model
 
 let update (msg) (model: Model) =
   match msg with
-  | Msg.AskSaveChange -> { model with AskSave = true }, Cmd.none
+  | Msg.AskSaveToogle -> { model with AskSave = not model.AskSave }, Cmd.none
   | Msg.ToogleFileOver -> { model with FileOver = not model.FileOver }, Cmd.none
   | Msg.InputChange s -> { model with InputValue = s }, Cmd.none
 
@@ -58,19 +55,19 @@ let view (model: Model) saveName dispatchContext dispatchState =
           AutoFocus true
           OnChange (fun e -> dispatchContext <| Msg.InputChange (e.Value))
           OnKeyPress (fun e -> 
-            if e.code = "Enter" then dispatchState <| AppState.Msg.ChangeSaveName model.InputValue)
+            if e.code = "Enter" then 
+              dispatchState <| AppState.Msg.ChangeSaveName model.InputValue
+              dispatchContext <| Msg.AskSaveToogle)
           SaveName.get saveName
           |> box 
-          |> DefaultValue
-        ]
+          |> DefaultValue ]
         button [ 
           Id "save-button"
-          OnClick (fun _ -> dispatchState <| AppState.Msg.ChangeSaveName model.InputValue)
-        ] [ str "Save" ] 
-      ]
-      div [ 
-        Id "save-drop" 
-      ] [ 
+          OnClick (fun _ -> 
+            dispatchState <| AppState.Msg.ChangeSaveName model.InputValue
+            dispatchContext <| Msg.AskSaveToogle)
+        ] [ str "Save" ] ]
+      div [ Id "save-drop" ] [ 
         div [ 
           Id "inner-save-drop"
           if model.FileOver then 
@@ -78,19 +75,23 @@ let view (model: Model) saveName dispatchContext dispatchState =
           OnDrop (fun e -> 
             e.preventDefault()
             e.stopPropagation()
-            match handleDrop e (AppState.Msg.LoadSave >> dispatchState) with
+            match handleDrop e 
+              (fun content -> 
+                dispatchState <| AppState.Msg.LoadSave content
+                dispatchContext <| Msg.AskSaveToogle) with
             | Success _ -> ()
-            | Failure err -> console.log err
-          )
+            | Failure err -> console.log err )
           OnDragOver (fun e -> 
             e.preventDefault()
-            e.stopPropagation()
-          )
+            e.stopPropagation() )
           OnDragEnter (fun e -> 
             dispatchContext <| Msg.ToogleFileOver
-            e.preventDefault()
-          )
-        ] [
-          str "Drop here" ]
-      ] 
-    ]
+            e.preventDefault() )
+        ] [ str "Drop here" ] ]
+      div [ Id "wipe-save" ] [
+        span [ 
+          Id "wipe-save-button"
+          OnClick (fun _ -> 
+            dispatchState <| AppState.Msg.WipeSave
+            dispatchContext <| Msg.AskSaveToogle)
+        ] [ str "Wipe Save" ] ] ]

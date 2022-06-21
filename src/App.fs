@@ -35,16 +35,9 @@ type Msg =
   | ContextMsg of ContextMsg
   | StateMsg of StateMsg
 
-let contextInit (): ContextModel =
-  { Save = Save.init()}
-
-let stateInit (): StateModel = 
-  { SaveName = Empty
-    Inventory = { Items = []; MaxCap = 10 } }
-
 let init () =
-  { Context = contextInit ()
-    State = stateInit () }
+  { Context = AppContext.init ()
+    State = AppState.init () }
   , Cmd.ofMsg (StateMsg StateMsg.GetSave)
 
 let update msg (model: Model) =
@@ -73,7 +66,7 @@ let view model (dispatch: Dispatch<Msg>) =
         h1 [Class "title"] [ str "The Grind Game"]
         h2 [ Class "save-name" ] [ 
           span 
-            [ OnClick (fun _ -> dispatchContextChange << ContextMsg.SaveContextChange <| SaveContext.AskSaveChange ) ]
+            [ OnClick (fun _ -> dispatchContextChange << ContextMsg.SaveContextChange <| SaveContext.AskSaveToogle ) ]
             [ match model.State.SaveName with
               | Save saveName -> 
                 str saveName
@@ -87,6 +80,6 @@ let view model (dispatch: Dispatch<Msg>) =
 Program.mkProgram init update view
 |> Program.withReactBatched "elmish-app"
 #if DEBUG
-// |> Program.withDebugger
+|> Program.withDebugger
 #endif
 |> Program.run

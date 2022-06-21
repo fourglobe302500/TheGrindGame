@@ -71,9 +71,15 @@ module SaveContext =
       FileOver: bool }
 
   type Msg =
-    | AskSaveChange
+    | AskSaveToogle
     | ToogleFileOver
     | InputChange of string
+    
+  let init () = 
+    { AskSave = false
+      InputValue = ""
+      Save = false
+      FileOver = false }
 
 [<RequireQualifiedAccess>]
 module AppContext =
@@ -83,10 +89,15 @@ module AppContext =
   type Msg =
     | SaveContextChange of SaveContext.Msg
 
+  let init () =
+    { Save = SaveContext.init()}
+
 open Browser
 open Fable.SimpleJson
 open Fable.Core
 open Elmish
+
+
 
 [<RequireQualifiedAccess>]
 module AppState =
@@ -94,21 +105,9 @@ module AppState =
     { Inventory: InventoryState 
       SaveName: SaveName }
 
-    static member parse json = 
-      match SimpleJson.parse json with    
-      | Helpers.ParseJsonObj [ "Save"; "Inventory" ] [ JString saveName; inventory ] ->
-        match inventory with
-        | Helpers.ParseJsonObj [ "Items"; "MaxCap" ] [ items; JNumber maxCap ] ->
-          let parseItems = function
-            | Helpers.ParseJsonObj [ "Item"; "Count" ] [ JString (Item.GetItem item); JNumber count ] ->
-              Some <| Slot(item, int count)
-            | _ -> None
-          match items with
-          | Helpers.ParseJsonArray parseItems items ->
-            Some { Inventory = { Items = items; MaxCap = int maxCap }; SaveName = Save saveName }
-          | _ -> None
-        | _ -> None
-      | _ -> None
+  let init () = 
+    { SaveName = Empty
+      Inventory = { Items = []; MaxCap = 10 } }
 
   type Msg =
     | StoreSave
@@ -119,6 +118,7 @@ module AppState =
     | ChangeMaxCapTo of int: int
     | LoadSave of Json: string
     | ChangeSaveName of SaveName: string
+    | WipeSave
 
   let update msg model =
     match msg with
@@ -146,12 +146,17 @@ module AppState =
       else model, Cmd.none
     | LoadSave json ->
       console.log("Loading", json)
-      let loaded = Model.parse json
-      console.log("Loaded", loaded)
-      match loaded with
-      | Some model ->
+      if json.Trim() <> "" then
+        let model = Json.parseAs<Model> json
+        console.log("Loaded", model)
         model, Cmd.none
-      | None ->
-        model, Cmd.none
+      else model, Cmd.ofMsg (StoreSave)
     | ChangeSaveName saveName -> 
-      { model with SaveName = Save saveName }, Cmd.none
+      (if saveName.Trim() <> "" then
+        { model with SaveName = Save <| saveName.TrimEnd() }
+      else
+        { model with SaveName = Empty })
+      , Cmd.ofMsg (StoreSave)
+    | WipeSave ->
+      init(), Cmd.ofMsg StoreSave
+

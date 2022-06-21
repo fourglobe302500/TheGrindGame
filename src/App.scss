@@ -190,3 +190,25 @@
     background-color: #555;
   }
 }
+
+#wipe-save {
+  width: 100%;
+  padding: .5rem;
+  border: 1px solid #111;
+  border-radius: 0.5rem;
+  background-color: #444;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#wipe-save-button {
+  color: rgb(126, 0, 0);
+  font-weight: bold;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0.5rem;
+  border: none;
+  background-color: #444;
+  text-align: center;
+}
