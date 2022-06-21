@@ -3,7 +3,7 @@ module TGG.Helpers
 
 open Fable.SimpleJson
 
-let parseJsonObj format mapper = function
+let private parseJsonObj format mapper = function
   | (JObject dict) -> 
     let value key = Map.tryFind key dict
     format
@@ -22,7 +22,7 @@ let (|ParseJsonObj|_|) format json=
     |> Some
   | _ -> None
 
-let parseJsonArray (mapper: 'a -> 'b option) l =
+let private parseJsonArray (mapper: 'a -> 'b option) l =
   let res = List.map (mapper) l
   if List.forall (function
     | Some x -> true

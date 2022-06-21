@@ -16,6 +16,7 @@ open Fable.Import
 open Fable.Import
 open Browser.Dom
 open Browser.Types
+open TGG.Types
 
 let [<Global>] console: JS.Console = jsNative
 
@@ -30,43 +31,22 @@ let handleDrop (e: Browser.Types.DragEvent) onload =
     fr.readAsText file
     Success ()
 
-type Model = 
-  { SaveName: SaveName
-    AskSave: bool
-    InputValue: string
-    Save: bool
-    FileOver: bool }
-  
-  member t.toJson () = 
-    SaveName.get t.SaveName
-    |> sprintf "\"%s\""
-
-type Msg =
-  | ChangeSave of SaveName: string
-  | AskSaveChange
-  | ToogleFileOver
-  | InputChange of string
-  | LoadSave of string
-
-let init () = 
-  { SaveName = SaveName.Empty; 
-    AskSave = false
+let init (): SaveContext.Model = 
+  { AskSave = false
     InputValue = ""
     Save = false
     FileOver = false }
 
-let update msg (model: Model) =
-  match msg with
-  | ChangeSave saveName -> 
-    { model with SaveName = Save saveName; AskSave = false; Save = true; InputValue = ""; FileOver = false }, Cmd.none
-  | AskSaveChange -> 
-    { model with AskSave = true }, Cmd.none
-  | InputChange value -> 
-    { model with InputValue = value }, Cmd.none
-  | ToogleFileOver -> 
-    { model with FileOver = not model.FileOver }, Cmd.none
+type Msg = SaveContext.Msg
+type Model = SaveContext.Model
 
-let view model dispatch =
+let update (msg) (model: Model) =
+  match msg with
+  | Msg.AskSaveChange -> { model with AskSave = true }, Cmd.none
+  | Msg.ToogleFileOver -> { model with FileOver = not model.FileOver }, Cmd.none
+  | Msg.InputChange s -> { model with InputValue = s }, Cmd.none
+
+let view (model: Model) saveName dispatchContext dispatchState =
   Modal.modal 
     model.AskSave [ Id "save-modal" ]
     [ h1 [] [ str "New Save" ] ] 
@@ -76,16 +56,16 @@ let view model dispatch =
         input [ 
           Id "save-input"
           AutoFocus true
-          OnChange (fun e -> dispatch <| InputChange (e.Value))
+          OnChange (fun e -> dispatchContext <| Msg.InputChange (e.Value))
           OnKeyPress (fun e -> 
-            if e.code = "Enter" then dispatch <| ChangeSave model.InputValue)
-          SaveName.get model.SaveName
+            if e.code = "Enter" then dispatchState <| AppState.Msg.ChangeSaveName model.InputValue)
+          SaveName.get saveName
           |> box 
           |> DefaultValue
         ]
         button [ 
           Id "save-button"
-          OnClick (fun _ -> dispatch <| ChangeSave model.InputValue)
+          OnClick (fun _ -> dispatchState <| AppState.Msg.ChangeSaveName model.InputValue)
         ] [ str "Save" ] 
       ]
       div [ 
@@ -98,7 +78,7 @@ let view model dispatch =
           OnDrop (fun e -> 
             e.preventDefault()
             e.stopPropagation()
-            match handleDrop e (LoadSave >> dispatch) with
+            match handleDrop e (AppState.Msg.LoadSave >> dispatchState) with
             | Success _ -> ()
             | Failure err -> console.log err
           )
@@ -107,7 +87,7 @@ let view model dispatch =
             e.stopPropagation()
           )
           OnDragEnter (fun e -> 
-            dispatch <| ToogleFileOver
+            dispatchContext <| Msg.ToogleFileOver
             e.preventDefault()
           )
         ] [

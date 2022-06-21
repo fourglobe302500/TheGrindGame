@@ -17,99 +17,72 @@ open Elmish.Debug
 #endif
 
 open TGG
+open TGG.Types
 
 importAll "./App.scss"
 
-type Model = 
-  { Inventory: Inventory.Model
-    Save: Save.Model }
-  
-  member t.toJson () =
-    sprintf "{\n\t\"Inventory\": %s,\n\t\"Save\": %s\n}" (t.Inventory.toJson "\t") (t.Save.toJson ())
+type ContextModel = AppContext.Model
+type ContextMsg = AppContext.Msg
 
-  static member serialize =
-    (fun json -> 
-      console.log json
-      json) >> SimpleJson.tryParse >> function
-      | None -> None
-      | Some json ->
-        match json with
-        | Helpers.ParseJsonObj [ "save"; "Inventory" ] [ JString save; inventory ] ->
-          match inventory with
-          | Helpers.ParseJsonObj [ "inventory"; "cap" ] [ inventory; JNumber cap ] ->
-            let parseItem = function
-              | Helpers.ParseJsonObj [ "item"; "count" ] [ JString item; JNumber count ] ->
-                match Item.fromString item with
-                  | Some item ->
-                    Some <| Inventory.Slot (item, int count)
-                  | None -> None
-              | _ -> None
-            match inventory with
-            | Helpers.ParseJsonArray parseItem inv ->
-              Some { Inventory = { Inventory = inv; MaxCap = int cap }; Save = { Save.init() with SaveName = Save save } }
-            | _ -> None
-          | _ -> None
-        | _ -> None 
+type StateModel = AppState.Model
+type StateMsg = AppState.Msg
+
+type Model =
+  { Context: ContextModel
+    State: StateModel}
 
 type Msg =
-  | InventoryMsg of Msg: Inventory.Msg
-  | SaveMsg of Msg: Save.Msg
-  | GlobalMsg of Msg: GlobalMsg
+  | ContextMsg of ContextMsg
+  | StateMsg of StateMsg
 
-let init () = 
-  { Save = Save.init ()
-    Inventory = Inventory.init() }
-  , Cmd.ofMsg (GlobalMsg GetSave)
+let contextInit (): ContextModel =
+  { Save = Save.init()}
+
+let stateInit (): StateModel = 
+  { SaveName = Empty
+    Inventory = { Items = []; MaxCap = 10 } }
+
+let init () =
+  { Context = contextInit ()
+    State = stateInit () }
+  , Cmd.ofMsg (StateMsg StateMsg.GetSave)
 
 let update msg (model: Model) =
   match msg with
-  | InventoryMsg msg -> 
-    let newInventory, cmd = Inventory.update msg model.Inventory
-    { model with Inventory = newInventory }, Cmd.map (InventoryMsg) cmd
-  | SaveMsg msg ->
-    let newSave, cmd = Save.update msg model.Save
-    if newSave.Save then 
-      { model with Save = { newSave with Save = false } }, Cmd.ofMsg <| GlobalMsg SaveSave
-    else 
-      { model with Save = newSave }, Cmd.map (SaveMsg) cmd
-  | GlobalMsg msg ->
+  | ContextMsg msg ->
     match msg with
-    | SaveSave ->
-      localStorage.setItem ("save", model.toJson())
-      model, Cmd.none
-    | GetSave -> 
-      console.log "serializing"
-      Model.serialize <| localStorage.getItem ("save")
-      |> function
-        | Some model ->
-          model, Cmd.none
-        | None ->
-          model, Cmd.none
+    | ContextMsg.SaveContextChange msg -> 
+      let (saveModel, cmd) = Save.update msg model.Context.Save
+      { model with Context = { model.Context with Save = saveModel } }, Cmd.map ContextMsg cmd
+  | StateMsg msg ->
+    let (stateModel, cmd) = AppState.update msg model.State
+    { model with State = stateModel }, Cmd.map StateMsg cmd
 
 let view model (dispatch: Dispatch<Msg>) =
+  let dispatchContextChange = dispatch << ContextMsg
+  let dispatchStateChange = dispatch << StateMsg
+
   fragment [] [
-    Save.view model.Save (SaveMsg >> dispatch)
+    Save.view model.Context.Save 
+              model.State.SaveName 
+              (dispatchContextChange << ContextMsg.SaveContextChange) 
+              dispatchStateChange
 
     div [ Class "container" ] [
       div [ Class "header"  ] [
         h1 [Class "title"] [ str "The Grind Game"]
         h2 [ Class "save-name" ] [ 
           span 
-            [ OnClick (fun _ -> dispatch <| SaveMsg Save.Msg.AskSaveChange ) ]
-            [ match model.Save.SaveName with
+            [ OnClick (fun _ -> dispatchContextChange << ContextMsg.SaveContextChange <| SaveContext.AskSaveChange ) ]
+            [ match model.State.SaveName with
               | Save saveName -> 
                 str saveName
               | Empty -> 
-                str "No Save" ]
-        ]
-      ]
+                str "No Save" ] ] ]
       div [ Class "body"  ] [
-        Inventory.view model.Inventory (InventoryMsg >> dispatch)
+        Inventory.view model.State.Inventory
         div [ Class "actions" ] []
-        div [ Class "automation" ] []
-      ]
-    ]
-  ]
+        div [ Class "automation" ] [] ] ] ]
 
 Program.mkProgram init update view
 |> Program.withReactBatched "elmish-app"

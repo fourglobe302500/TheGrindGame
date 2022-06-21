@@ -4,8 +4,8 @@
     <TargetFramework>net6</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Types.fs" />
     <Compile Include="Helpers.fs" />
+    <Compile Include="Types/Global.fs" />
     <Compile Include="Modal.fs" />
     <Compile Include="Save.fs" />
     <Compile Include="Inventory.fs" />
