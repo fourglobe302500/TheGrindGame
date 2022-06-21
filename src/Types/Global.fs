@@ -76,7 +76,7 @@ module SaveContext =
     | InputChange of string
     
   let init () = 
-    { AskSave = false
+    { AskSave = true
       InputValue = ""
       Save = false
       FileOver = false }
@@ -96,8 +96,6 @@ open Browser
 open Fable.SimpleJson
 open Fable.Core
 open Elmish
-
-
 
 [<RequireQualifiedAccess>]
 module AppState =
@@ -120,6 +118,10 @@ module AppState =
     | ChangeSaveName of SaveName: string
     | WipeSave
 
+  type ReturnMsg =
+    | Context of AppContext.Msg
+    | State of Msg
+
   let update msg model =
     match msg with
     | StoreSave ->
@@ -129,7 +131,7 @@ module AppState =
       model, Cmd.none
     | GetSave ->
       let json = localStorage.getItem("save")
-      model, Cmd.ofMsg (LoadSave json)
+      model, Cmd.ofMsg (State <| LoadSave json)
     | AddItem item ->
       let inventory = model.Inventory + item
       { model with Inventory = inventory }, Cmd.none
@@ -146,17 +148,20 @@ module AppState =
       else model, Cmd.none
     | LoadSave json ->
       console.log("Loading", json)
-      if json.Trim() <> "" then
+      if Helpers.notEmpty json then
         let model = Json.parseAs<Model> json
         console.log("Loaded", model)
-        model, Cmd.none
-      else model, Cmd.ofMsg (StoreSave)
+        model, 
+          match model.SaveName with 
+          | Empty -> Cmd.none 
+          | _ -> Cmd.ofMsg (Context << AppContext.Msg.SaveContextChange <| SaveContext.Msg.AskSaveToogle)
+      else model, Cmd.ofMsg (State StoreSave)
     | ChangeSaveName saveName -> 
-      (if saveName.Trim() <> "" then
+      (if Helpers.notEmpty saveName then
         { model with SaveName = Save <| saveName.TrimEnd() }
       else
         { model with SaveName = Empty })
-      , Cmd.ofMsg (StoreSave)
+      , Cmd.ofMsg (State StoreSave)
     | WipeSave ->
-      init(), Cmd.ofMsg StoreSave
+      init(), Cmd.ofMsg (State StoreSave)
 

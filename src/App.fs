@@ -18,6 +18,7 @@ open Elmish.Debug
 
 open TGG
 open TGG.Types
+open Elmish.ReactNative.Components
 
 importAll "./App.scss"
 
@@ -49,7 +50,10 @@ let update msg (model: Model) =
       { model with Context = { model.Context with Save = saveModel } }, Cmd.map ContextMsg cmd
   | StateMsg msg ->
     let (stateModel, cmd) = AppState.update msg model.State
-    { model with State = stateModel }, Cmd.map StateMsg cmd
+    { model with State = stateModel }
+    , Cmd.map (function 
+      | AppState.ReturnMsg.State msg -> StateMsg msg 
+      | AppState.ReturnMsg.Context msg -> ContextMsg msg) cmd
 
 let view model (dispatch: Dispatch<Msg>) =
   let dispatchContextChange = dispatch << ContextMsg

@@ -2,6 +2,11 @@
 module TGG.Helpers
 
 open Fable.SimpleJson
+open Fable.Core.Util
+open Fable.Core
+
+[<Emit("$0 !== undefined && $0 !== null && $0.trim() !== ''")>]
+let notEmpty str: bool = jsNative
 
 let private parseJsonObj format mapper = function
   | (JObject dict) -> 

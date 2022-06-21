@@ -44,6 +44,10 @@ let update (msg) (model: Model) =
   | Msg.InputChange s -> { model with InputValue = s }, Cmd.none
 
 let view (model: Model) saveName dispatchContext dispatchState =
+  let dispatchSave _ = 
+    if Helpers.notEmpty model.InputValue then
+      dispatchState <| AppState.Msg.ChangeSaveName model.InputValue
+      dispatchContext <| Msg.AskSaveToogle
   Modal.modal 
     model.AskSave [ Id "save-modal" ]
     [ h1 [] [ str "New Save" ] ] 
@@ -56,16 +60,13 @@ let view (model: Model) saveName dispatchContext dispatchState =
           OnChange (fun e -> dispatchContext <| Msg.InputChange (e.Value))
           OnKeyPress (fun e -> 
             if e.code = "Enter" then 
-              dispatchState <| AppState.Msg.ChangeSaveName model.InputValue
-              dispatchContext <| Msg.AskSaveToogle)
+              dispatchSave())
           SaveName.get saveName
           |> box 
           |> DefaultValue ]
         button [ 
           Id "save-button"
-          OnClick (fun _ -> 
-            dispatchState <| AppState.Msg.ChangeSaveName model.InputValue
-            dispatchContext <| Msg.AskSaveToogle)
+          OnClick dispatchSave
         ] [ str "Save" ] ]
       div [ Id "save-drop" ] [ 
         div [ 
@@ -92,6 +93,5 @@ let view (model: Model) saveName dispatchContext dispatchState =
         span [ 
           Id "wipe-save-button"
           OnClick (fun _ -> 
-            dispatchState <| AppState.Msg.WipeSave
-            dispatchContext <| Msg.AskSaveToogle)
+            dispatchState <| AppState.Msg.WipeSave)
         ] [ str "Wipe Save" ] ] ]
