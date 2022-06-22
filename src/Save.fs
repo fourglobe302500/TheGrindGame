@@ -93,5 +93,6 @@ let view (model: Model) saveName dispatchContext dispatchState =
         span [ 
           Id "wipe-save-button"
           OnClick (fun _ -> 
-            dispatchState <| AppState.Msg.WipeSave)
+            dispatchState <| AppState.Msg.WipeSave
+            dispatchContext <| Msg.InputChange "")
         ] [ str "Wipe Save" ] ] ]

@@ -79,7 +79,11 @@ let view model (dispatch: Dispatch<Msg>) =
       div [ Class "body"  ] [
         Inventory.view model.State.Inventory
         div [ Class "actions" ] []
-        div [ Class "automation" ] [] ] ] ]
+        div [ Class "automation-logger-container" ] [
+          div [ Class "automation" ] [] 
+          div [ Class "logger" ] [
+            for log in model.State.Logs -> 
+              span [ Class "log" ] [ str <| Log.get log ] ] ] ] ] ]
 
 Program.mkProgram init update view
 |> Program.withReactBatched "elmish-app"

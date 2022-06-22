@@ -62,6 +62,12 @@ type InventoryState =
       |> List.map (Slot.get >> fst)
       |> List.contains item
 
+type Log = Message of string
+
+[<RequireQualifiedAccess>]
+module Log =
+  let get = function Message s -> s
+
 [<RequireQualifiedAccess>]
 module SaveContext =
   type Model = 
@@ -101,10 +107,26 @@ open Elmish
 module AppState =
   type Model = 
     { Inventory: InventoryState 
+      Logs: Log list
       SaveName: SaveName }
 
   let init () = 
     { SaveName = Empty
+      Logs = [
+        Message "Last Log"
+        Message "Really Long Log.\n Lorem ipsum dolor sit amet consectetur adipisicing elit.\n Quidem, cupiditate enim quisquam, voluptas error obcaecati, quaerat alias dolore excepturi necessitatibus qui hic! Eaque deleniti enim fuga quos laudantium distinctio voluptates, facere natus beatae aperiam similique temporibus ipsum illo sed laborum hic accusamus vitae incidunt ullam autem.\n Cumque earum explicabo officia."
+        Message "Oldest Log"
+        Message "More Logs"
+        Message "More Logs"
+        Message "More Logs"
+        Message "More Logs"
+        Message "More Logs"
+        Message "More Logs"
+        Message "More Logs"
+        Message "More Logs"
+        Message "More Logs"
+        Message "More Logs"
+      ]
       Inventory = { Items = []; MaxCap = 10 } }
 
   type Msg =
@@ -117,6 +139,8 @@ module AppState =
     | LoadSave of Json: string
     | ChangeSaveName of SaveName: string
     | WipeSave
+    | Log of Msg: string
+    | ClearLogs
 
   type ReturnMsg =
     | Context of AppContext.Msg
@@ -164,4 +188,8 @@ module AppState =
       , Cmd.ofMsg (State StoreSave)
     | WipeSave ->
       init(), Cmd.ofMsg (State StoreSave)
+    | Log msg ->
+      { model with Logs = Message(msg)::model.Logs }, Cmd.ofMsg (State StoreSave)
+    | ClearLogs ->
+      { model with Logs = [] }, Cmd.ofMsg (State StoreSave)
 
