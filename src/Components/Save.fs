@@ -1,5 +1,5 @@
 [<RequireQualifiedAccess>]
-module TGG.Save
+module TGG.Components.Save
 
 open Fable
 open Fable.Core
@@ -16,8 +16,9 @@ open Fable.Import
 open Fable.Import
 open Browser.Dom
 open Browser.Types
-open TGG.Types
 open Elmish.ReactNative.Components
+
+open TGG
 
 let [<Global>] console: JS.Console = jsNative
 
@@ -93,6 +94,6 @@ let view (model: Model) saveName dispatchContext dispatchState =
         span [ 
           Id "wipe-save-button"
           OnClick (fun _ -> 
-            dispatchState <| AppState.Msg.WipeSave
-            dispatchContext <| Msg.InputChange "")
+            dispatchContext <| Msg.InputChange ""
+            dispatchState <| AppState.Msg.WipeSave )
         ] [ str "Wipe Save" ] ] ]

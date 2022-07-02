@@ -5,10 +5,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Helpers.fs" />
-    <Compile Include="Types/Global.fs" />
-    <Compile Include="Modal.fs" />
-    <Compile Include="Save.fs" />
-    <Compile Include="Inventory.fs" />
+    <Compile Include="Types\Global.fs" />
+    <Compile Include="Components\Modal.fs" />
+    <Compile Include="Components\Save.fs" />
+    <Compile Include="Components\Inventory.fs" />
+    <Compile Include="Components\Action.fs" />
+    <Compile Include="Components\ActionContainer.fs" />
+    <Compile Include="Components\Actions.fs" />
     <Compile Include="App.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />

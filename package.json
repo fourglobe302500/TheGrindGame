@@ -2,7 +2,7 @@
   "name": "the-grind-game",
   "license": "MIT",
   "private": true,
-  "version": "0.0.4",
+  "version": "0.0.5",
   "scripts": {
     "postinstall": "dotnet tool restore",
     "start": "dotnet fable watch src --run webpack-dev-server",
@@ -28,6 +28,8 @@
     "webpack-dev-server": "^4.0.0"
   },
   "dependencies": {
+    "file-loader": "^6.2.0",
+    "font-awesome": "^4.7.0",
     "react": "^18.2.0",
     "react-dom": "^18.1.0"
   },

@@ -1,29 +1,46 @@
 [<AutoOpen>]
 module TGG.Types
 
+open Fable
+open Fable.React
+open Elmish
+
 type Result<'s, 'f> =
   | Success of 's
   | Failure of 'f
 
 type Item = 
+  | Empty
   | Pebble
   | Stick
-  | Empty
 
 [<RequireQualifiedAccess>]
 module Item =
+  [<Measure>] type id
+
   let toString = function
+    | Empty -> "Empty"
     | Pebble -> "Pebble"
     | Stick -> "Stick"
-    | Empty -> "Empty"
 
   let fromString = function
-    | "Pebble" -> Some Pebble
-    | "Stick" -> Some Stick
-    | "Empty" -> Some Empty
-    | _ -> None
+    | "Pebble" -> Pebble
+    | "Stick" -> Stick
+    | _ -> Empty
 
-  let (|GetItem|_|) = fromString
+  let fromId = function
+    | 1<id> -> Pebble
+    | 2<id> -> Stick
+    | _ -> Empty
+
+  let getId = function
+    | Empty -> 0<id>
+    | Pebble -> 1<id>
+    | Stick -> 2<id>
+
+  let (|GetItem|) = fromString
+
+  let (|Item|) = toString
 
 type SaveName =
   | Save of string
@@ -68,6 +85,181 @@ type Log = Message of string
 module Log =
   let get = function Message s -> s
 
+type ItemAmount = ItemAmount of item: Item * count: int
+
+[<RequireQualifiedAccess>]
+module ItemAmount =
+  let get = function ItemAmount (item, count) -> item,count
+
+type ItemRequirement = ItemRequirement of ItemAmount
+
+[<RequireQualifiedAccess>]
+module ItemRequirement =
+  let get = function ItemRequirement a -> ItemAmount.get a
+
+type ItemResult = ItemResult of ItemAmount
+
+[<RequireQualifiedAccess>]
+module ItemResult =
+  let get = function ItemResult a -> ItemAmount.get a
+
+[<Measure>] type sec
+
+[<Measure>] type min
+
+[<Measure>] type h
+
+[<Measure>] type day
+
+[<Measure>] type y
+
+type Time =
+  | Seconds of int<sec>
+  | Minutes of int<min>
+  | Hours of int<h>
+  | Days of int<day>
+  | Years of int<y>
+
+[<RequireQualifiedAccess>]
+module Time =
+  let secPerMin = 60<sec/min>
+  let getMin (sec: int<sec>) = sec % 60<sec>, sec/secPerMin
+  let (|GetMin|) = getMin
+
+  let minPerHour = 60<min/h>
+  let getHour (min: int<min>) = min % 60<min>, min/minPerHour
+  let (|GetHour|) = getHour
+
+  let hourPerDay = 24<h/day>
+  let getDay (h: int<h>) = h % 24<h>, h/hourPerDay
+  let (|GetDay|) = getDay
+
+  let daysPerYear = 365<day/y>
+  let getYear (day: int<day>) = day % 365<day>, day/daysPerYear
+  let (|GetYear|) = getYear
+
+  let (|GetAllFromSec|) = function (GetMin (s, GetHour (m, GetDay (h, GetYear (d, y))))) -> (s, m, h, d, y) 
+  let (|GetAllFromMin|) = function ( GetHour (m, GetDay (h, GetYear (d, y)))) -> (m, h, d, y) 
+  let (|GetAllFromHour|) = function (GetDay (h, GetYear (d, y))) -> (h, d, y)  
+
+  let get = function
+    | Seconds (GetAllFromSec (s, m, h, d, y)) -> (y, d, h, m, s) 
+    | Minutes (GetAllFromMin (m, h, d, y)) -> (y, d, h, m, 0<sec>)
+    | Hours (GetAllFromHour (h, d, y)) -> (y, d, h, 0<min>, 0<sec>)
+    | Days (GetYear (d, y)) -> (y, d, 0<h>, 0<min>, 0<sec>)
+    | Years y -> (y, 0<day>, 0<h>, 0<min>, 0<sec>)
+
+  let fromAllToText (y, d, h, m, s) =
+    sprintf "%i:%i:%i, day %i, year %i" h m s d y
+
+  let fromAllToDuration (y, d, h, m, s) =
+    let s = if s = 0<sec> then None else Some <| sprintf "%i seconds" s 
+    let m = if m = 0<min> then None else Some <| sprintf "%i minutes" m 
+    let h = if h = 0<h> then None else Some <| sprintf "%i hours" h 
+    let d = if d = 0<day> then None else Some <| sprintf "%i days" d 
+    let y = if y = 0<y> then None else Some <| sprintf "%i years" y
+
+    [y; d; h; m; s]
+    |> List.filter Option.isSome
+    |> List.map (fun op -> op.Value)
+    |> String.concat ", "
+
+  let toText = get >> fromAllToText
+
+  let toDuration = get >> fromAllToDuration
+
+  let toTextFromSeconds = Seconds >> toText
+
+  let toDurationFromSeconds = Seconds >> toDuration
+
+type ActionType =
+  | Gathering
+  | Combat
+  | Exploration
+  | Crafting
+  | Farming
+  | Hauling
+
+[<RequireQualifiedAccess>]
+module ActionType =
+  let get = function
+    | Gathering -> "Gathering"
+    | Combat -> "Combat"
+    | Exploration -> "Exploration"
+    | Crafting -> "Crafting"
+    | Farming -> "Farming"
+    | Hauling -> "Hauling"
+
+  let all = [
+    Gathering
+    Combat
+    Exploration
+    Crafting
+    Farming
+    Hauling ]
+
+[<RequireQualifiedAccess>]
+module Action =
+  [<Measure>] type id
+
+  [<RequireQualifiedAccess>]
+  module State =
+
+    type Model = 
+      { Name: string
+        Requirements: ItemRequirement list
+        Results: ItemResult list
+        Duration: Time
+        Type: ActionType
+        Id: int<id> }
+
+    type Actions = Model list
+
+    let name action = action.Name
+    let requirements action = action.Requirements
+    let results action = action.Results
+    let duration action = action.Duration
+    let type' action = action.Type
+    let id action = action.Id
+
+    let private format t l get =
+      if List.length l = 0 then str "No Requirements"
+      else
+        l
+        |> List.map (fun e ->
+          let (item, count) = get e
+          str <| sprintf "%s %i %s%s" t count (Item.toString item) (if count = 0 then "" else "s"))
+        |> fragment []
+
+    let formatRequirements action = format "Needs" action.Requirements ItemRequirement.get 
+
+    let formatResults action = format "Gives" action.Results ItemResult.get 
+
+  [<RequireQualifiedAccess>]
+  module Context =
+    type Model = ActionContext of Map<ActionType, bool>
+    
+    type Msg =
+      | Toogle of ActionType
+
+    let get s (ActionContext model) =
+      model
+      |> Map.find s
+
+    let init () =
+      ActionType.all
+      |> List.map (fun t -> t,false)
+      |> Map.ofList
+      |> ActionContext
+
+    let update msg (ActionContext model) =
+      match msg with
+      | Toogle t ->
+        model
+        |> Map.change t (Option.map (fun b -> not b))
+        |> ActionContext
+        , Cmd.none
+
 [<RequireQualifiedAccess>]
 module SaveContext =
   type Model = 
@@ -90,13 +282,16 @@ module SaveContext =
 [<RequireQualifiedAccess>]
 module AppContext =
   type Model = 
-    { Save: SaveContext.Model }
+    { Save: SaveContext.Model
+      Actions: Action.Context.Model }
 
   type Msg =
     | SaveContextChange of SaveContext.Msg
+    | ActionContextChange of Action.Context.Msg
 
   let init () =
-    { Save = SaveContext.init()}
+    { Save = SaveContext.init()
+      Actions = Action.Context.init() }
 
 open Browser
 open Fable.SimpleJson
@@ -108,26 +303,43 @@ module AppState =
   type Model = 
     { Inventory: InventoryState 
       Logs: Log list
-      SaveName: SaveName }
+      Actions: Action.State.Actions
+      SaveName: SaveName
+      Time: int<sec> }
 
   let init () = 
-    { SaveName = Empty
-      Logs = [
-        Message "Last Log"
-        Message "Really Long Log.\n Lorem ipsum dolor sit amet consectetur adipisicing elit.\n Quidem, cupiditate enim quisquam, voluptas error obcaecati, quaerat alias dolore excepturi necessitatibus qui hic! Eaque deleniti enim fuga quos laudantium distinctio voluptates, facere natus beatae aperiam similique temporibus ipsum illo sed laborum hic accusamus vitae incidunt ullam autem.\n Cumque earum explicabo officia."
-        Message "Oldest Log"
-        Message "More Logs"
-        Message "More Logs"
-        Message "More Logs"
-        Message "More Logs"
-        Message "More Logs"
-        Message "More Logs"
-        Message "More Logs"
-        Message "More Logs"
-        Message "More Logs"
-        Message "More Logs"
+    { Time = 0<sec>
+      SaveName = Empty
+      Actions = [
+        {
+          Type = Gathering
+          Name = "Get Pebble"
+          Requirements = []
+          Results = [
+            ItemResult <| ItemAmount (Pebble, 1)
+          ]
+          Duration = Seconds 5<sec>
+          Id = 0<Action.id>
+        }
+        {
+          Type = Crafting
+          Name = "Hit Peebles"
+          Requirements = [
+            ItemRequirement <| ItemAmount (Pebble, 2)
+            ItemRequirement <| ItemAmount (Stick, 1)
+          ]
+          Results = [
+            ItemResult <| ItemAmount (Pebble, 2)
+          ]
+          Duration = Seconds 100<sec>
+          Id = 1<Action.id>
+        }
       ]
-      Inventory = { Items = []; MaxCap = 10 } }
+      Logs = []
+      Inventory = { Items = [
+        Slot(Pebble, 5)
+        Slot(Stick, 5)
+      ]; MaxCap = 10 } }
 
   type Msg =
     | StoreSave

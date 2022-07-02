@@ -32,6 +32,13 @@ NUGET
       Fable.Elmish (>= 4.0.0-beta-3) - restriction: >= netstandard2.0
       Fable.React (>= 8.0.1) - restriction: >= netstandard2.0
       FSharp.Core (>= 4.7.2) - restriction: >= netstandard2.0
+    Fable.FontAwesome (2.0) - restriction: >= netstandard2.0
+      Fable.Core (>= 3.0) - restriction: >= netstandard2.0
+      Fable.React (>= 5.1) - restriction: >= netstandard2.0
+    Fable.FontAwesome.Free (2.1)
+      Fable.Core (>= 3.0) - restriction: >= netstandard2.0
+      Fable.FontAwesome (>= 2.0) - restriction: >= netstandard2.0
+      Fable.React (>= 5.1) - restriction: >= netstandard2.0
     Fable.Parsimmon (4.1) - restriction: >= netstandard2.0
       Fable.Core (>= 3.0) - restriction: >= netstandard2.0
       FSharp.Core (>= 4.6.2) - restriction: >= netstandard2.0

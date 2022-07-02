@@ -1,5 +1,5 @@
 [<RequireQualifiedAccess>]
-module TGG.Modal
+module TGG.Components.Modal
 
 open Fable
 open Fable.Core

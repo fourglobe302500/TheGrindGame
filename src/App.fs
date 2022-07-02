@@ -17,6 +17,7 @@ open Elmish.Debug
 #endif
 
 open TGG
+open TGG.Components
 open TGG.Types
 open Elmish.ReactNative.Components
 
@@ -48,6 +49,9 @@ let update msg (model: Model) =
     | ContextMsg.SaveContextChange msg -> 
       let (saveModel, cmd) = Save.update msg model.Context.Save
       { model with Context = { model.Context with Save = saveModel } }, Cmd.map ContextMsg cmd
+    | ContextMsg.ActionContextChange msg ->
+      let (actionModel, cmd) = Action.Context.update msg model.Context.Actions
+      { model with Context = { model.Context with Actions = actionModel } }, Cmd.map ContextMsg cmd
   | StateMsg msg ->
     let (stateModel, cmd) = AppState.update msg model.State
     { model with State = stateModel }
@@ -68,6 +72,7 @@ let view model (dispatch: Dispatch<Msg>) =
     div [ Class "container" ] [
       div [ Class "header"  ] [
         h1 [Class "title"] [ str "The Grind Game"]
+        h3 [ Class "time" ] [ str << Time.toTextFromSeconds <| model.State.Time ]
         h2 [ Class "save-name" ] [ 
           span 
             [ OnClick (fun _ -> dispatchContextChange << ContextMsg.SaveContextChange <| SaveContext.AskSaveToogle ) ]
@@ -78,7 +83,7 @@ let view model (dispatch: Dispatch<Msg>) =
                 str "No Save" ] ] ]
       div [ Class "body"  ] [
         Inventory.view model.State.Inventory
-        div [ Class "actions" ] []
+        Actions.view model.State.Actions model.Context.Actions (dispatchContextChange << ContextMsg.ActionContextChange)
         div [ Class "automation-logger-container" ] [
           div [ Class "automation" ] [] 
           div [ Class "logger" ] [
