@@ -3,11 +3,7 @@ module App
 
 open TGG
 open TGG.Types
-open Fable
-open Fable.React
-open Fable.SimpleJson
 open Elmish
-open Browser
 
 [<RequireQualifiedAccess>]
 module Context =
@@ -20,7 +16,7 @@ module Context =
     | ActionContextChange of Action.Context.Msg
 
   let init () =
-    { Save = Save.Context.init()
+    { Save = Save.Context.init ""
       Actions = Action.Context.init() }
 
 [<RequireQualifiedAccess>]
@@ -78,6 +74,7 @@ module State =
     | WipeSave
     | Log of Msg: string
     | ClearLogs
+    | ActionChange of Action.State.Msg
 
 type Model =
   { Context: Context.Model
@@ -91,60 +88,3 @@ let init () =
   { Context = Context.init ()
     State = State.init () }
   , Cmd.ofMsg (StateMsg State.GetSave)
-
-let update msg (model: Model) =
-  match msg with
-  | ContextMsg msg ->
-    match msg with
-    | Context.SaveContextChange msg -> 
-      let (saveModel, cmd) = Save.update msg model.Context.Save
-      { model with Context = { model.Context with Save = saveModel } }, Cmd.map ContextMsg cmd
-    | Context.ActionContextChange msg ->
-      let (actionModel, cmd) = Action.Context.update msg model.Context.Actions
-      { model with Context = { model.Context with Actions = actionModel } }, Cmd.map ContextMsg cmd
-  | StateMsg msg ->
-    match msg with
-    | State.StoreSave ->
-      let json = SimpleJson.stringify model
-      console.log("Saving", json)
-      localStorage.setItem("save", json)
-      model, Cmd.none
-    | State.GetSave ->
-      let json = localStorage.getItem("save")
-      model, Cmd.ofMsg (StateMsg <| State.LoadSave json)
-    | State.AddItem item ->
-      let inventory = model.State.Inventory + item
-      { model with State = { model.State with Inventory = inventory } }, Cmd.none
-    | State.RemoveItem item ->
-      let inventory = model.State.Inventory - item
-      { model with State = { model.State with Inventory = inventory } }, Cmd.none
-    | State.ChangeMaxCapBy delta ->
-      if delta > 0 then
-        { model with State = { model.State with Inventory = { model.State.Inventory with MaxCap = model.State.Inventory.MaxCap+delta } } }, Cmd.none
-      else model, Cmd.none
-    | State.ChangeMaxCapTo maxCap ->
-      if maxCap > 0 then
-        { model with State = { model.State with Inventory = { model.State.Inventory with MaxCap = maxCap } } }, Cmd.none
-      else model, Cmd.none
-    | State.LoadSave json ->
-      console.log("Loading", json)
-      if Helpers.notEmpty json then
-        let state = Json.parseAs<State.Model> json
-        console.log("Loaded", model)
-        { model with State = state }, 
-          match model.State.SaveName with 
-          | Save.Empty -> Cmd.none 
-          | _ -> Cmd.ofMsg (ContextMsg << Context.Msg.SaveContextChange <| Save.Context.Msg.AskSaveToogle)
-      else model, Cmd.ofMsg (StateMsg State.StoreSave)
-    | State.ChangeSaveName saveName -> 
-      (if Helpers.notEmpty saveName then
-        { model with State = { model.State with SaveName = Save.Save <| saveName.TrimEnd() } }
-      else
-        { model with State = { model.State with SaveName = Save.Empty } } )
-      , Cmd.ofMsg (StateMsg State.StoreSave)
-    | State.WipeSave ->
-      { model with State =  State.init() } , Cmd.ofMsg (StateMsg State.StoreSave)
-    | State.Log msg ->
-      { model with State = { model.State with Logs = Message(msg)::model.State.Logs } }, Cmd.ofMsg (StateMsg State.StoreSave)
-    | State.ClearLogs ->
-      { model with State = { model.State with Logs = [] } }, Cmd.ofMsg (StateMsg State.StoreSave)

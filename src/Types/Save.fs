@@ -21,12 +21,13 @@ module Context =
 
   type Msg =
     | AskSaveToogle
+    | AskSaveSet of bool
     | ToogleFileOver
     | InputChange of string
     
-  let init () = 
+  let init v = 
     { AskSave = true
-      InputValue = ""
+      InputValue = v
       Save = false
       FileOver = false }
 
@@ -35,3 +36,4 @@ let update (msg) (model: Context.Model) =
   | Context.AskSaveToogle -> { model with AskSave = not model.AskSave }, Cmd.none
   | Context.ToogleFileOver -> { model with FileOver = not model.FileOver }, Cmd.none
   | Context.InputChange s -> { model with InputValue = s }, Cmd.none
+  | Context.AskSaveSet v -> { model with AskSave = v }, Cmd.none

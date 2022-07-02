@@ -30,6 +30,7 @@ module Type =
     Crafting
     Farming
     Hauling ]
+
 [<Measure>] type id
 
 [<RequireQualifiedAccess>]
@@ -42,6 +43,9 @@ module State =
       Duration: Time
       Type: Type
       Id: int<id> }
+
+  type Msg =
+    | Run of Id: int<id>
 
   type Actions = Model list
 
@@ -90,10 +94,20 @@ module Context =
       |> ActionContext
       , Cmd.none
 
+type Msg =
+  | ContextMsg of Context.Msg
+  | StateMsg of State.Msg
+
 let canRun (inv: Inventory.State) (action: State.Model) =
   action.Requirements
   |> List.forall (fun (Item.ItemRequirement(Item.ItemAmount(item, count1))) -> (
     inv.Items
     |> List.map Slot.get
     |> List.filter (fst >> (=) item)
-    |> List.exists (fun (_, count2) -> count2 >= count1) ) )
+    |> List.exists (fun (_, count2) -> count2 >= count1) ) ) &&
+  action.Results
+  |> List.forall (fun (Item.ItemResult(Item.ItemAmount(item, count1))) -> (
+    inv.Items
+    |> List.map Slot.get
+    |> List.filter (fst >> (=) item)
+    |> List.forall (fun (_, count2) -> count2+count1 <= inv.MaxCap) ) )

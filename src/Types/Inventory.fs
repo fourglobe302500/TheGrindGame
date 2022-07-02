@@ -3,6 +3,8 @@ module Inventory
 
 open TGG.Types
 
+let min = Operators.min
+
 type State =
   { Items: Slot list
     MaxCap: int }
@@ -16,10 +18,16 @@ type State =
               else yield Slot(i, count) ] }
 
     static member (+) (inv, item) = 
-      State.manipulate (fun count -> max (count+1) inv.MaxCap) inv item
+      State.manipulate (fun count -> min (count+1) inv.MaxCap) inv item
 
     static member (-) (inv, item) =
-      State.manipulate (fun count -> Operators.min (count-1) 0) inv item
+      State.manipulate (fun count -> max (count-1) 0) inv item
+
+    static member (++) (inv, (item, counti)) = 
+      State.manipulate (fun count -> min (count+counti) inv.MaxCap) inv item
+
+    static member (--) (inv, (item, counti)) =
+      State.manipulate (fun count -> max (count-counti) 0) inv item
 
 let canRemove item m = 
   m.Items

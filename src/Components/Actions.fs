@@ -5,7 +5,11 @@ open Fable.React
 open Fable.React.Props
 open TGG.Components
 
-let view state context contextDispatch =
+let view state context dispatch =
+  let dispatch =
+    function
+    | Action.ContextMsg msg -> dispatch << App.Msg.ContextMsg << App.Context.ActionContextChange <| msg
+    | Action.StateMsg msg -> dispatch << App.Msg.StateMsg << App.State.ActionChange <| msg
   div [ Class "actions" ] [
     div [ Class "header sub" ] [
       h3 [ Class "title" ] [ str "Actions" ] ]
@@ -13,4 +17,4 @@ let view state context contextDispatch =
       for t in Action.Type.all ->
         context
         |> Action.Context.get t
-        |> ActionContainer.view t state (fun _ -> contextDispatch <| Action.Context.Msg.Toogle t) ] ]
+        |> ActionContainer.view t state dispatch ] ]

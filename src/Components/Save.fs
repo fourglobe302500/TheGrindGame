@@ -1,7 +1,6 @@
 [<RequireQualifiedAccess>]
 module TGG.Components.Save
 
-open Fable.Core
 open Fable.React
 open Fable.React.Props
 open Elmish.React
@@ -9,8 +8,6 @@ open Fable.Import
 open Browser.Dom
 
 open TGG
-
-let [<Global>] console: JS.Console = jsNative
 
 let handleDrop (e: Browser.Types.DragEvent) onload =
   let files = e.dataTransfer.files
