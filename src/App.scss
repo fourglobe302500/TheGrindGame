@@ -208,8 +208,31 @@
     background-color: #333;
     border-bottom-right-radius: .5rem;
     border-top-right-radius: .5rem;
-    padding: .35rem;
+    padding: .5rem;
     padding-right: 0;
+    display: flex;
+    position: relative;
+
+    &-runner {
+      background-color: #111;
+      position: absolute;
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      right: 0;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      padding: .5rem;
+      border-radius: .5rem;
+
+      &.can-run {
+        color: wheat;
+        
+        &:hover {
+          background-color: #222;
+          color: black;
+        }
+      }
+    }
   }
 
   &-tooltip {

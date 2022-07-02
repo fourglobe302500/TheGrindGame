@@ -1,22 +1,12 @@
 [<RequireQualifiedAccess>]
 module TGG.Components.Save
 
-open Fable
 open Fable.Core
 open Fable.React
 open Fable.React.Props
-open Elmish
 open Elmish.React
-open Elmish.ReactNative
-open Fable.Core.JsInterop
-open System
-open System.IO
-open Fable.Import
-open Fable.Import
 open Fable.Import
 open Browser.Dom
-open Browser.Types
-open Elmish.ReactNative.Components
 
 open TGG
 
@@ -33,22 +23,11 @@ let handleDrop (e: Browser.Types.DragEvent) onload =
     fr.readAsText file
     Success ()
 
-let init = SaveContext.init
-
-type Msg = SaveContext.Msg
-type Model = SaveContext.Model
-
-let update (msg) (model: Model) =
-  match msg with
-  | Msg.AskSaveToogle -> { model with AskSave = not model.AskSave }, Cmd.none
-  | Msg.ToogleFileOver -> { model with FileOver = not model.FileOver }, Cmd.none
-  | Msg.InputChange s -> { model with InputValue = s }, Cmd.none
-
-let view (model: Model) saveName dispatchContext dispatchState =
+let view (model: Save.Context.Model) saveName dispatchContext dispatchState =
   let dispatchSave _ = 
     if Helpers.notEmpty model.InputValue then
-      dispatchState <| AppState.Msg.ChangeSaveName model.InputValue
-      dispatchContext <| Msg.AskSaveToogle
+      dispatchState <| App.State.ChangeSaveName model.InputValue
+      dispatchContext <| Save.Context.AskSaveToogle
   Modal.modal 
     model.AskSave [ Id "save-modal" ]
     [ h1 [] [ str "New Save" ] ] 
@@ -58,11 +37,11 @@ let view (model: Model) saveName dispatchContext dispatchState =
         input [ 
           Id "save-input"
           AutoFocus true
-          OnChange (fun e -> dispatchContext <| Msg.InputChange (e.Value))
+          OnChange (fun e -> dispatchContext <| Save.Context.InputChange (e.Value))
           OnKeyPress (fun e -> 
             if e.code = "Enter" then 
               dispatchSave())
-          SaveName.get saveName
+          Save.Name.get saveName
           |> box 
           |> DefaultValue ]
         button [ 
@@ -79,21 +58,21 @@ let view (model: Model) saveName dispatchContext dispatchState =
             e.stopPropagation()
             match handleDrop e 
               (fun content -> 
-                dispatchState <| AppState.Msg.LoadSave content
-                dispatchContext <| Msg.AskSaveToogle) with
+                dispatchState <| App.State.LoadSave content
+                dispatchContext <| Save.Context.AskSaveToogle) with
             | Success _ -> ()
             | Failure err -> console.log err )
           OnDragOver (fun e -> 
             e.preventDefault()
             e.stopPropagation() )
           OnDragEnter (fun e -> 
-            dispatchContext <| Msg.ToogleFileOver
+            dispatchContext <| Save.Context.ToogleFileOver
             e.preventDefault() )
         ] [ str "Drop here" ] ]
       div [ Id "wipe-save" ] [
         span [ 
           Id "wipe-save-button"
           OnClick (fun _ -> 
-            dispatchContext <| Msg.InputChange ""
-            dispatchState <| AppState.Msg.WipeSave )
+            dispatchContext <| Save.Context.InputChange ""
+            dispatchState <| App.State.WipeSave )
         ] [ str "Wipe Save" ] ] ]
