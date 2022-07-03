@@ -1,9 +1,12 @@
 [<RequireQualifiedAccess>]
-module App
+module TGG.Types.App
 
 open TGG
 open TGG.Types
 open Elmish
+
+type Stats =
+  { Actions: Statistics.Model<int<Action.id>> }
 
 [<RequireQualifiedAccess>]
 module Context =
@@ -26,41 +29,16 @@ module State =
       Logs: Log list
       Actions: Action.State.Actions
       SaveName: Save.Name
-      Time: int<sec> }
+      Time: int<sec> 
+      Stats: Stats}
 
   let init () = 
     { Time = 0<sec>
       SaveName = Save.Empty
-      Actions = [
-        {
-          Type = Action.Gathering
-          Name = "Get Pebble"
-          Requirements = []
-          Results = [
-            Item.ItemResult <| Item.ItemAmount (Pebble, 1)
-          ]
-          Duration = Seconds 5<sec>
-          Id = 0<Action.id>
-        }
-        {
-          Type = Action.Crafting
-          Name = "Hit Peebles"
-          Requirements = [
-            Item.ItemRequirement <| Item.ItemAmount (Pebble, 2)
-            Item.ItemRequirement <| Item.ItemAmount (Stick, 1)
-          ]
-          Results = [
-            Item.ItemResult <| Item.ItemAmount (Pebble, 2)
-          ]
-          Duration = Seconds 100<sec>
-          Id = 1<Action.id>
-        }
-      ]
+      Actions = Action.initialActions
       Logs = []
-      Inventory = { Items = [
-        Slot(Pebble, 1)
-        Slot(Stick, 1)
-      ]; MaxCap = 10 } }
+      Inventory = { Items = []; MaxCap = 10 } 
+      Stats = { Actions = Statistics.Statistics [] }}
 
   type Msg =
     | StoreSave

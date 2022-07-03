@@ -40,6 +40,16 @@ module Time =
   let (|GetAllFromMin|) = function ( GetHour (m, GetDay (h, GetYear (d, y)))) -> (m, h, d, y) 
   let (|GetAllFromHour|) = function (GetDay (h, GetYear (d, y))) -> (h, d, y)  
 
+  let toSec = function
+    | Seconds t -> t
+    | Minutes t -> t*secPerMin
+    | Hours t -> t*secPerMin*minPerHour
+    | Days t -> t*secPerMin*minPerHour*hourPerDay
+    | Years t -> t*secPerMin*minPerHour*hourPerDay*daysPerYear
+
+  let addTime s t =
+    toSec t |> (+) s
+
   let get = function
     | Seconds (GetAllFromSec (s, m, h, d, y)) -> (y, d, h, m, s) 
     | Minutes (GetAllFromMin (m, h, d, y)) -> (y, d, h, m, 0<sec>)
@@ -48,9 +58,9 @@ module Time =
     | Years y -> (y, 0<day>, 0<h>, 0<min>, 0<sec>)
 
   let fromAllToText (y, d, h, m, s) =
-    sprintf "%i:%i:%i, day %i, year %i" h m s d y
+    sprintf "%02i:%02i:%02i, day %i, year %i" h m s d y
 
-  let fromAllToDuration (y, d, h, m, s) =
+  let fromAllToDuration (y, d, h, m, s) = 
     let s = if s = 0<sec> then None else Some <| sprintf "%i seconds" s 
     let m = if m = 0<min> then None else Some <| sprintf "%i minutes" m 
     let h = if h = 0<h> then None else Some <| sprintf "%i hours" h 

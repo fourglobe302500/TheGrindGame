@@ -273,6 +273,7 @@
 
     top: -5%;
     left: 110%;
+    white-space: pre;
 
     &::after {
       content: " ";
@@ -283,6 +284,7 @@
       border-width: 5px;
       border-style: solid;
       border-color: transparent black transparent transparent;
+      height: .25rem;
     }
   }
 

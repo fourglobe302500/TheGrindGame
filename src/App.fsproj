@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6</TargetFramework>
@@ -6,11 +6,13 @@
   <ItemGroup>
     <Compile Include="Helpers.fs" />
     <Compile Include="Types\Global.fs" />
+    <Compile Include="Types\Statistics.fs" />
     <Compile Include="Types\Item.fs" />
     <Compile Include="Types\Time.fs" />
     <Compile Include="Types\Save.fs" />
     <Compile Include="Types\Inventory.fs" />
     <Compile Include="Types\Action.fs" />
+    <Compile Include="Types\Events.fs" />
     <Compile Include="Types\App.fs" />
     <Compile Include="Components\Modal.fs" />
     <Compile Include="Components\Save.fs" />

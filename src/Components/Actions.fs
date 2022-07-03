@@ -4,6 +4,7 @@ module TGG.Components.Actions
 open Fable.React
 open Fable.React.Props
 open TGG.Components
+open TGG.Types
 
 let view state context dispatch =
   let dispatch =

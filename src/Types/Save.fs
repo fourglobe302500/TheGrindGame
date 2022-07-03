@@ -1,5 +1,5 @@
 [<RequireQualifiedAccess>]
-module Save
+module TGG.Types.Save
 
 open Elmish
 
@@ -9,7 +9,9 @@ type Name =
 
 [<RequireQualifiedAccess>]
 module Name =
-  let get = function | Save (name) -> name | Empty -> ""
+  let empty = ""
+
+  let get = function | Save (name) -> name | Empty -> empty
 
 [<RequireQualifiedAccess>]
 module Context =
@@ -26,7 +28,7 @@ module Context =
     | InputChange of string
     
   let init v = 
-    { AskSave = true
+    { AskSave = false
       InputValue = v
       Save = false
       FileOver = false }

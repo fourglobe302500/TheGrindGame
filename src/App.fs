@@ -60,7 +60,7 @@ let update msg (model: App.Model) =
           match model.State.SaveName with 
           | Save.Empty -> Cmd.none 
           | _ -> Cmd.ofMsg (App.ContextMsg << App.Context.Msg.SaveContextChange << Save.Context.Msg.AskSaveSet <| false)
-      else model, Cmd.ofMsg (App.StateMsg App.State.StoreSave)
+      else model, Cmd.batch <| [Cmd.ofMsg << App.StateMsg <| App.State.StoreSave; Cmd.ofMsg << App.ContextMsg << App.Context.SaveContextChange <| Save.Context.AskSaveToogle ]
     | App.State.ChangeSaveName saveName -> 
       (if Helpers.notEmpty saveName then
         { model with State = { model.State with SaveName = Save.Save <| saveName.TrimEnd() } }

@@ -3,7 +3,7 @@ module TGG.Components.ActionContainer
 
 open Fable.React
 open Fable.React.Props
-open System
+open TGG.Types
 
 let view t (model: App.State.Model) dispatch show = 
   div [ Class "action-container" ] [

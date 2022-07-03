@@ -30,7 +30,7 @@ let update msg (model: App.State.Model) =
             |> List.fold (fun inv item -> inv ++ item) inv
             |> fun inv ->
               console.log inv
-              { model with Inventory = inv }, Cmd.ofMsg << App.StateMsg <| App.State.StoreSave
+              { model with Time = Time.addTime model.Time action.Duration ; Inventory = inv }, Cmd.ofMsg << App.StateMsg <| App.State.StoreSave
 
 let view (inv: Inventory.State) dispatch (action: Action.State.Model) =
   div [ Class "action-item" ] [
@@ -44,16 +44,16 @@ let view (inv: Inventory.State) dispatch (action: Action.State.Model) =
             div [ Class "requirements" ] [
               yield span [ Class "requirements-header" ] [ str "Requirements:" ]
               yield!
-                action.Requirements
-                |> List.map (fun (Item.ItemRequirement(Item.ItemAmount(Item.Item item, count))) ->
-                  span [ Class "requirement-item" ] [ str <| sprintf "%s: %i" item count ] ) ]
+                action
+                |> Action.State.formatRequirements 
+                |> List.map (fun e -> span [ Class "requirement-item" ] [e] ) ]
           if action.Results.Length <> 0 then
             div [ Class "results" ] [
               yield span [ Class "results-header" ] [ str "Results:" ]
               yield! 
-                action.Results
-                |> List.map (fun (Item.ItemResult(Item.ItemAmount(Item.Item item, count))) ->
-                  span [ Class "requirement-item" ] [ str <| sprintf "%s: %i" item count ] ) ] ] ] ]
+                action
+                |> Action.State.formatResults
+                |> List.map (fun e -> span [ Class "result-item" ] [ e ] ) ] ] ] ]
     div [ 
       Class <| sprintf "action-item-runner %s" (if Action.canRun inv action then "can-run" else "")
       OnClick <| fun _ -> dispatch << Action.StateMsg << Action.State.Run <| action.Id

@@ -8,6 +8,7 @@ open Fable.Import
 open Browser.Dom
 
 open TGG
+open TGG.Types
 
 let handleDrop (e: Browser.Types.DragEvent) onload =
   let files = e.dataTransfer.files
@@ -24,6 +25,8 @@ let view (model: Save.Context.Model) saveName dispatchContext dispatchState =
   let dispatchSave _ = 
     if Helpers.notEmpty model.InputValue then
       dispatchState <| App.State.ChangeSaveName model.InputValue
+      dispatchContext <| Save.Context.AskSaveToogle
+    elif Save.Name.get saveName <> Save.Name.empty then
       dispatchContext <| Save.Context.AskSaveToogle
   Modal.modal 
     model.AskSave [ Id "save-modal" ]

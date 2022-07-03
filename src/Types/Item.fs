@@ -46,11 +46,16 @@ module Item =
   module Requirement =
     let get = function ItemRequirement a -> Amount.get a
 
-  type Result = ItemResult of Amount
+  [<Measure>] type percent
+
+  type Result = ItemResult of Amount: Amount * Chance: float<percent>
 
   [<RequireQualifiedAccess>]
   module Result =
-    let get = function ItemResult a -> Amount.get a
+    let get = function 
+      | ItemResult (a, chance) -> 
+        let (item, count) = Amount.get a
+        item, count, chance
 
 
 type Slot = Slot of Item: Item * Count: int
