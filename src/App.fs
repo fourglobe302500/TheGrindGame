@@ -30,6 +30,9 @@ let update msg (model: App.Model) =
     | App.Context.ActionContextChange msg ->
       let (actionModel, cmd) = Action.Context.update msg model.Context.Actions
       { model with Context = { model.Context with Actions = actionModel } }, Cmd.map App.ContextMsg cmd
+    | App.Context.StatsContextChange msg ->
+      let (model, cmd) = Stats.update (Stats.ContextMsg msg) model
+      model, cmd
   | App.StateMsg msg ->
     match msg with
     | App.State.StoreSave ->
@@ -57,8 +60,8 @@ let update msg (model: App.Model) =
       if Helpers.notEmpty json then
         let state = Json.parseAs<App.State.Model> json
         { model with State = state; Context = { model.Context with Save = { model.Context.Save with InputValue = Save.Name.get model.State.SaveName } } }, 
-          match model.State.SaveName with 
-          | Save.Empty -> Cmd.none 
+          match state.SaveName with 
+          | Save.Empty -> Cmd.ofMsg << App.ContextMsg << App.Context.SaveContextChange <| Save.Context.AskSaveToogle
           | _ -> Cmd.ofMsg (App.ContextMsg << App.Context.Msg.SaveContextChange << Save.Context.Msg.AskSaveSet <| false)
       else model, Cmd.batch <| [Cmd.ofMsg << App.StateMsg <| App.State.StoreSave; Cmd.ofMsg << App.ContextMsg << App.Context.SaveContextChange <| Save.Context.AskSaveToogle ]
     | App.State.ChangeSaveName saveName -> 
@@ -68,7 +71,10 @@ let update msg (model: App.Model) =
         { model with State = { model.State with SaveName = Save.Empty } } )
       , Cmd.ofMsg (App.StateMsg App.State.StoreSave)
     | App.State.WipeSave ->
-      { model with State =  App.State.init() } , Cmd.ofMsg (App.StateMsg App.State.StoreSave)
+      { model with State =  App.State.init() } 
+      , Cmd.batch [ 
+        Cmd.ofMsg << App.StateMsg <| App.State.StoreSave
+        Cmd.ofMsg << App.ContextMsg << App.Context.SaveContextChange << Save.Context.InputChange <| "" ]
     | App.State.Log msg ->
       { model with State = { model.State with Logs = Message(msg)::model.State.Logs } }, Cmd.ofMsg (App.StateMsg App.State.StoreSave)
     | App.State.ClearLogs ->
@@ -76,6 +82,9 @@ let update msg (model: App.Model) =
     | App.State.ActionChange msg ->
       let (state, cmd) = Action.update msg model.State
       { model with State = state }, cmd
+    | App.State.StatsChange msg ->
+      let (model, cmd) = Stats.update (Stats.StateMsg msg) model
+      model, cmd
 
 let view (model: App.Model) (dispatch: Dispatch<App.Msg>) =
   let dispatchContextChange = dispatch << App.ContextMsg
@@ -86,22 +95,30 @@ let view (model: App.Model) (dispatch: Dispatch<App.Msg>) =
               model.State.SaveName 
               (dispatchContextChange << App.Context.SaveContextChange) 
               dispatchStateChange
+    Stats.view model.Context.Stats
+                    model.State
+                    (dispatchContextChange << App.Context.StatsContextChange)
 
     div [ Class "container" ] [
       div [ Class "header"  ] [
         h1 [Class "title"] [ str "The Grind Game"]
         h3 [ Class "time" ] [ str << Time.toTextFromSeconds <| model.State.Time ]
-        h2 [ Class "save-name" ] [ 
-          span 
-            [ OnClick (fun _ -> dispatchContextChange << App.Context.SaveContextChange <| Save.Context.AskSaveToogle ) ]
-            [ match model.State.SaveName with
-              | Save.Save saveName -> 
-                str saveName
-              | Save.Empty -> 
-                str "No Save" ] ] ]
+        div [ Class "right" ] [
+          h2 [ Class "stats" ] [ 
+            span 
+              [ OnClick (fun _ -> dispatchContextChange << App.Context.StatsContextChange <| Stats.Context.StatsShowToogle ) ] 
+              [ str "Stats" ] ]
+          h2 [ Class "save-name" ] [ 
+            span 
+              [ OnClick (fun _ -> dispatchContextChange << App.Context.SaveContextChange <| Save.Context.AskSaveToogle ) ]
+              [ match model.State.SaveName with
+                | Save.Save saveName -> 
+                  str saveName
+                | Save.Empty -> 
+                  str "No Save" ] ] ] ]
       div [ Class "body"  ] [
         Inventory.view model.State.Inventory
-        Actions.view model.State model.Context.Actions dispatch
+        Action.view model.State model.Context.Actions dispatch
         div [ Class "automation-logger-container" ] [
           div [ Class "automation" ] [] 
           div [ Class "logger" ] [

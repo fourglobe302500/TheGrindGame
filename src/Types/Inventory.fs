@@ -4,7 +4,7 @@ module TGG.Types.Inventory
 open TGG.Types
 open System
 
-let min = Operators.min
+let private min = Operators.min
 
 let private rnd = Random()
 
@@ -39,7 +39,21 @@ type State =
     static member (--) (inv, (item, counti)) =
       State.manipulate (fun count -> max (count-counti) 0) inv item
 
+let items inv = inv.Items
+
 let canRemove item m = 
   m.Items
   |> List.map (Slot.get >> fst)
   |> List.contains item
+
+let dif inv1 inv2 =
+  [
+    for Slot(item, amount) in inv1.Items -> 
+      inv2.Items
+      |> List.map Slot.get
+      |> List.tryFind (fst >> (=) item)
+      |> (function
+      | Some (_, c) -> (item, max (amount-c) 0)
+      | None -> (item, amount) )
+      |> Slot
+  ]

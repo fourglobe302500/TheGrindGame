@@ -1,8 +1,9 @@
-[<RequireQualifiedAccessAttribute>]
+[<RequireQualifiedAccess>]
 module TGG.Components.Action
 
 open Fable.React
 open Fable.React.Props
+open TGG
 open TGG.Types
 open TGG.Components
 open Elmish
@@ -28,11 +29,17 @@ let update msg (model: App.State.Model) =
             action.Results
             |> List.map (Item.Result.get)
             |> List.fold (fun inv item -> inv ++ item) inv
-            |> fun inv ->
-              console.log inv
-              { model with Time = Time.addTime model.Time action.Duration ; Inventory = inv }, Cmd.ofMsg << App.StateMsg <| App.State.StoreSave
+            |> fun finv ->
+              let diff = Inventory.dif finv inv
+              { 
+                model with 
+                  Time = Time.addTime model.Time action.Duration; 
+                  Inventory = finv; }
+              , Cmd.batch [
+                Cmd.ofMsg << App.StateMsg <| App.State.StoreSave 
+                Cmd.ofMsg << App.StateMsg << App.State.StatsChange << Stats.State.RunAction <| (action.Id, diff) ]
 
-let view (inv: Inventory.State) dispatch (action: Action.State.Model) =
+let actionView (inv: Inventory.State) dispatch (action: Action.State.Model) =
   div [ Class "action-item" ] [
     div [ Class "action-item-body" ] [
       h2 [] [ str action.Name ]
@@ -58,3 +65,31 @@ let view (inv: Inventory.State) dispatch (action: Action.State.Model) =
       Class <| sprintf "action-item-runner %s" (if Action.canRun inv action then "can-run" else "")
       OnClick <| fun _ -> dispatch << Action.StateMsg << Action.State.Run <| action.Id
     ] [ str "RUN" ] ]
+
+let actionConteinerView t (model: App.State.Model) dispatch show = 
+  div [ Class "action-container" ] [
+    div [ Class "action-container-header" ] [
+      h2 [ Class "action-container-header-title" ] [ str << Action.Type.get <| t ]
+      div [ 
+        Class "cove action-container-header-show" 
+        OnClick (fun _ -> dispatch << Action.ContextMsg << Action.Context.Toogle <| t)
+      ] [ if show then str "\uf077" else str "\uf078" ] ]
+    if show then
+      model.Actions
+      |> List.filter (Action.State.type' >> (=) t)
+      |> List.map (actionView model.Inventory dispatch)
+      |> div [ Class "action-items" ] ]
+
+let view state context dispatch =
+  let dispatch =
+    function
+    | Action.ContextMsg msg -> dispatch << App.Msg.ContextMsg << App.Context.ActionContextChange <| msg
+    | Action.StateMsg msg -> dispatch << App.Msg.StateMsg << App.State.ActionChange <| msg
+  div [ Class "actions" ] [
+    div [ Class "header sub" ] [
+      h3 [ Class "title" ] [ str "Actions" ] ]
+    div [ Class "actions-body" ] [
+      for t in Action.Type.all ->
+        context
+        |> Action.Context.get t
+        |> actionConteinerView t state dispatch ] ]

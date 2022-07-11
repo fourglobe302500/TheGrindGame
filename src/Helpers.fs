@@ -4,6 +4,7 @@ module TGG.Helpers
 open Fable.SimpleJson
 open Fable.Core.Util
 open Fable.Core
+open Browser
 
 [<Emit("$0 !== undefined && $0 !== null && $0.trim() !== ''")>]
 let notEmpty str: bool = jsNative
@@ -40,3 +41,13 @@ let (|ParseJsonArray|_|) mapper json =
   | (JArray l) -> 
     parseJsonArray mapper l
   | _ -> None
+
+let inList a = [ a ]
+
+let prettyItemsLog (label: string) l (map: 'a -> 'b) = 
+  let a =
+    l
+    |> List.map map
+    |> List.toArray
+  
+  console.log(label, a)

@@ -1,6 +1,8 @@
 [<AutoOpen>]
 module TGG.Types.Item
 
+open TGG
+
 type Item = 
   | Empty
   | Pebble
@@ -63,3 +65,9 @@ type Slot = Slot of Item: Item * Count: int
 [<RequireQualifiedAccess>]
 module Slot =
   let get = function Slot(item, count) -> item, count
+
+  let prettyPrintList label l =
+    let map = get >> fun (Item.Item item, count) -> (item, count) 
+
+    Helpers.prettyItemsLog label l map
+

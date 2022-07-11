@@ -5,22 +5,22 @@ open TGG
 open TGG.Types
 open Elmish
 
-type Stats =
-  { Actions: Statistics.Model<int<Action.id>> }
-
 [<RequireQualifiedAccess>]
 module Context =
   type Model = 
     { Save: Save.Context.Model
-      Actions: Action.Context.Model }
+      Actions: Action.Context.Model
+      Stats: Stats.Context.Model }
 
   type Msg =
     | SaveContextChange of Save.Context.Msg
     | ActionContextChange of Action.Context.Msg
+    | StatsContextChange of Stats.Context.Msg
 
   let init () =
-    { Save = Save.Context.init ""
-      Actions = Action.Context.init() }
+    { Save = Save.Context.init ()
+      Actions = Action.Context.init ()
+      Stats = Stats.Context.init () }
 
 [<RequireQualifiedAccess>]
 module State =
@@ -30,7 +30,7 @@ module State =
       Actions: Action.State.Actions
       SaveName: Save.Name
       Time: int<sec> 
-      Stats: Stats}
+      Stats: Stats.State.Model }
 
   let init () = 
     { Time = 0<sec>
@@ -38,7 +38,7 @@ module State =
       Actions = Action.initialActions
       Logs = []
       Inventory = { Items = []; MaxCap = 10 } 
-      Stats = { Actions = Statistics.Statistics [] }}
+      Stats = Stats.State.init () }
 
   type Msg =
     | StoreSave
@@ -53,6 +53,7 @@ module State =
     | Log of Msg: string
     | ClearLogs
     | ActionChange of Action.State.Msg
+    | StatsChange of Stats.State.Msg
 
 type Model =
   { Context: Context.Model

@@ -27,9 +27,9 @@ module Context =
     | ToogleFileOver
     | InputChange of string
     
-  let init v = 
+  let init () = 
     { AskSave = false
-      InputValue = v
+      InputValue = ""
       Save = false
       FileOver = false }
 

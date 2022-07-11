@@ -112,9 +112,15 @@
   border-radius: 0.5rem;
 }
 
-.save-name {
+.right {
   position: absolute;
   right: 1em;
+  display: flex;
+  width: fit-content;
+  gap: 1rem;
+}
+
+.save-name, .stats {
   cursor: pointer;
 }
 
