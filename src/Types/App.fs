@@ -43,8 +43,8 @@ module State =
   type Msg =
     | StoreSave
     | GetSave
-    | AddItem of Item: Item
-    | RemoveItem of Item: Item
+    | AddItem of Item: Item.Item
+    | RemoveItem of Item: Item.Item
     | ChangeMaxCapBy of int: int
     | ChangeMaxCapTo of int: int
     | LoadSave of Json: string

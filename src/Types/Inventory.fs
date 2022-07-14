@@ -9,20 +9,20 @@ let private min = Operators.min
 let private rnd = Random()
 
 type State =
-  { Items: Slot list
+  { Items: Item.Slot list
     MaxCap: int }
 
     static member private manipulate f inv item =
       { 
         inv with 
           Items = 
-            if List.exists (Slot.get >> fst >> (=) item) inv.Items then
+            if List.exists (Item.Slot.get >> fst >> (=) item) inv.Items then
               inv.Items
               |> List.map (function 
-                | Slot(i, count) when i = item -> Slot(i, f count)
+                | Item.ItemSlot(i, count) when i = item -> Item.ItemSlot(i, f count)
                 | slot -> slot)
             else
-              inv.Items@[Slot(item, f 0) ] }
+              inv.Items@[Item.ItemSlot(item, f 0) ] }
 
     static member (+) (inv, item) = 
       State.manipulate (fun count -> min (count+1) inv.MaxCap) inv item
@@ -43,17 +43,17 @@ let items inv = inv.Items
 
 let canRemove item m = 
   m.Items
-  |> List.map (Slot.get >> fst)
+  |> List.map (Item.Slot.get >> fst)
   |> List.contains item
 
 let dif inv1 inv2 =
   [
-    for Slot(item, amount) in inv1.Items -> 
+    for Item.ItemSlot(item, amount) in inv1.Items -> 
       inv2.Items
-      |> List.map Slot.get
+      |> List.map Item.Slot.get
       |> List.tryFind (fst >> (=) item)
       |> (function
       | Some (_, c) -> (item, max (amount-c) 0)
       | None -> (item, amount) )
-      |> Slot
+      |> Item.ItemSlot
   ]

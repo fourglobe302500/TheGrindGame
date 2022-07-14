@@ -69,16 +69,17 @@ module State =
 
   let private plural c = if c = 1 then "" else "s"
 
-  let formatRequirements action = 
-    fun (Item.ItemRequirement(Item.ItemAmount(Item.Item item, count))) -> sprintf "Requires %i %s%s" count item (plural count)
+  let formatRequirements items action = 
+    fun (Item.ItemRequirement(Item.ItemAmount(id, count))) 
+      -> sprintf "Requires %i %s%s" count (Item.fromIdToString items id) (plural count)
     |> format action.Requirements
 
-  let formatResults action = 
-    (fun (Item.ItemResult(Item.ItemAmount(Item.Item item, count), chance)) -> 
+  let formatResults items action = 
+    (fun (Item.ItemResult(Item.ItemAmount(id, count), chance)) -> 
       let withChance = 
         if chance = 100.<Item.percent> then ""
         else sprintf " with \na chance of %.1f%%" chance
-      sprintf "Results %i %s%s%s" count item (plural count) withChance)
+      sprintf "Results %i %s%s%s" count (Item.fromIdToString items id) (plural count) withChance)
     |> format action.Results
 
 [<RequireQualifiedAccess>]
@@ -115,16 +116,16 @@ let canRun (inv: Inventory.State) (action: State.Model) =
     action.Requirements
     |> List.forall (fun (Item.ItemRequirement(Item.ItemAmount(item, count1))) -> (
       inv.Items
-      |> List.map Slot.get
-      |> List.filter (fst >> (=) item)
+      |> List.map Item.Slot.get
+      |> List.filter (fst >> Item.getId >> (=) item)
       |> List.exists (fun (_, count2) -> count2 >= count1) ) )
   let resultsMet =
     action.Results
     |> List.forall (fun (Item.ItemResult(Item.ItemAmount(item, _), _)) -> (
       let item = 
         inv.Items
-        |> List.map Slot.get
-        |> List.filter (fst >> (=) item)
+        |> List.map Item.Slot.get
+        |> List.filter (fst >> Item.getId >> (=) item)
       match item with
       | [] -> true
       | items -> List.exists (fun (_, count2) -> count2 < inv.MaxCap) items ) )
@@ -135,28 +136,31 @@ let requirement item c = Item.ItemRequirement << Item.ItemAmount <| (item, c)
 let result item c (chance) = Item.ItemResult <| (Item.ItemAmount (item, c), chance*1.<Item.percent>) 
 
 let initialActions = 
+  let pebbleId = 0<Item.id>
+  let stickId = 1<Item.id>
+  
   [ { State.Default with
         Name = "Get Pebble"
         Type = Gathering
         Requirements = []
         Results = [
-          result Pebble 1 100 ]
+          result pebbleId 1 100 ]
         Duration = Seconds 5<sec>
         Id = 0<id> }
     { Type = Crafting
       Name = "Hit Peebles"
       Requirements = [
-        requirement Pebble 2 ]
+        requirement pebbleId 2 ]
       Results = [
-        result Pebble 1 100
-        result Pebble 1 80 ]
+        result pebbleId 1 100
+        result pebbleId 1 80 ]
       Duration = Seconds 100<sec>
       Id = 1<id> }
     { Type = Gathering
       Name = "Get Stick"
       Requirements = []
       Results = [
-        result Stick 1 95 ] 
+        result stickId 1 95 ] 
       Duration = Seconds 5<sec>
       Id = 2<id> } ]
   |> fun l ->

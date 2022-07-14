@@ -13,9 +13,9 @@ let view (model: Inventory.State) =
       span [ Class "subtitle" ] [ str <| sprintf "Max Capacity: %i" model.MaxCap ] ]
     div [ Class "inventory-body" ] [
       div [ Class "slots" ] [
-        for Item.Slot (item, count) in model.Items ->
+        for Item.ItemSlot (item, count) in model.Items ->
           div [ Class "slot" ] [
             div [ Class "item" ] [
-              span [ Class "name" ] [ str (Item.toString item) ]
+              span [ Class "name" ] [ str (Item.getString item) ]
               span [ Class "count" ] [ str <| sprintf "%i/%i" count model.MaxCap ] ] ] ] ] ]
 

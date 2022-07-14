@@ -19,7 +19,7 @@ module State =
       ItemsUsed: Model<int<Item.id>> }
 
   type Msg =
-    | RunAction of ActionId: int<Action.id> * AddedItems: Slot list
+    | RunAction of ActionId: int<Action.id> * AddedItems: Item.Slot list
 
   let init () =
     { Actions = Stats [] 

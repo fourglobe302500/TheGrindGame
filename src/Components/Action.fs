@@ -24,11 +24,11 @@ let update msg (model: App.State.Model) =
         else
           action.Requirements
           |> List.map (Item.Requirement.get)
-          |> List.fold (fun inv item -> inv -- item) model.Inventory
+          |> List.fold (fun inv (id, amount) -> inv -- (Item.fromId id Item.items, amount)) model.Inventory
           |> fun inv -> 
             action.Results
             |> List.map (Item.Result.get)
-            |> List.fold (fun inv item -> inv ++ item) inv
+            |> List.fold (fun inv (id, amount, chance) -> inv ++ (Item.fromId id Item.items, amount, chance)) inv
             |> fun finv ->
               let diff = Inventory.dif finv inv
               { 
@@ -52,14 +52,14 @@ let actionView (inv: Inventory.State) dispatch (action: Action.State.Model) =
               yield span [ Class "requirements-header" ] [ str "Requirements:" ]
               yield!
                 action
-                |> Action.State.formatRequirements 
+                |> Action.State.formatRequirements Item.items 
                 |> List.map (fun e -> span [ Class "requirement-item" ] [e] ) ]
           if action.Results.Length <> 0 then
             div [ Class "results" ] [
               yield span [ Class "results-header" ] [ str "Results:" ]
               yield! 
                 action
-                |> Action.State.formatResults
+                |> Action.State.formatResults Item.items
                 |> List.map (fun e -> span [ Class "result-item" ] [ e ] ) ] ] ] ]
     div [ 
       Class <| sprintf "action-item-runner %s" (if Action.canRun inv action then "can-run" else "")

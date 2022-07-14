@@ -40,14 +40,14 @@ let update msg (model: App.Model) =
 
         itemsMade
         |> List.map fst
-        |> List.append (List.map (Slot.get >> fst >> Item.getId) added)
+        |> List.append (List.map (Item.Slot.get >> fst >> Item.getId) added)
         |> List.distinct
         |> List.sort
         |> List.map (fun id ->
           let item1 =
             itemsMade |> List.tryFind (fst >> (=) id)
           let item2 =
-            added |> List.map (Slot.get) |> List.tryFind (fst >> Item.getId >> (=) id)
+            added |> List.map (Item.Slot.get) |> List.tryFind (fst >> Item.getId >> (=) id)
 
           match item1, item2 with
           | (Some (_, count1), Some (_, count2)) -> (id, count1+count2)
@@ -65,14 +65,14 @@ let update msg (model: App.Model) =
 
         itemsUsed
         |> List.map fst
-        |> List.append (List.map (fst >> Item.getId) itemsRequired)
+        |> List.append (List.map (fst) itemsRequired)
         |> List.distinct
         |> List.sort
         |> List.map (fun id ->
           let item1 =
             itemsUsed |> List.tryFind (fst >> (=) id)
           let item2 =
-            itemsRequired |> List.tryFind (fst >> Item.getId >> (=) id)
+            itemsRequired |> List.tryFind (fst >> (=) id)
           match item1, item2 with
           | (Some (_, count1), Some (_, count2)) -> (id, count1+count2)
           | (Some (_, count), None) -> (id, count)
@@ -113,11 +113,11 @@ let statsTableItem getLabel label items =
 let statsTableView (state: App.State.Model) =
   div [ Class "stats-lists" ] [ 
     statsTableItem 
-      (Item.fromId >> Item.toString) 
+      (fun id -> Item.fromId id Item.items |> Item.getString) 
       "Items Used" 
       state.Stats.ItemsUsed
     statsTableItem 
-      (Item.fromId >> Item.toString) 
+      (fun id -> Item.fromId id Item.items |> Item.getString) 
       "Items Made" 
       state.Stats.ItemsMade
     statsTableItem 
