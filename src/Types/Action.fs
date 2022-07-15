@@ -111,7 +111,7 @@ type Msg =
   | ContextMsg of Context.Msg
   | StateMsg of State.Msg
 
-let canRun (inv: Inventory.State) (action: State.Model) =
+let canRun (inv: Inventory.State.Model) (action: State.Model) =
   let requirementsMet =
     action.Requirements
     |> List.forall (fun (Item.ItemRequirement(Item.ItemAmount(item, count1))) -> (
@@ -135,7 +135,7 @@ let canRun (inv: Inventory.State) (action: State.Model) =
 let requirement item c = Item.ItemRequirement << Item.ItemAmount <| (item, c)
 let result item c (chance) = Item.ItemResult <| (Item.ItemAmount (item, c), chance*1.<Item.percent>) 
 
-let initialActions = 
+let allActions = 
   let pebbleId = 0<Item.id>
   let stickId = 1<Item.id>
   
@@ -147,6 +147,13 @@ let initialActions =
           result pebbleId 1 100 ]
         Duration = Seconds 5<sec>
         Id = 0<id> }
+    { Type = Gathering
+      Name = "Get Stick"
+      Requirements = []
+      Results = [
+        result stickId 1 95 ] 
+      Duration = Seconds 5<sec>
+      Id = 1<id> }
     { Type = Crafting
       Name = "Hit Peebles"
       Requirements = [
@@ -155,13 +162,6 @@ let initialActions =
         result pebbleId 1 100
         result pebbleId 1 80 ]
       Duration = Seconds 100<sec>
-      Id = 1<id> }
-    { Type = Gathering
-      Name = "Get Stick"
-      Requirements = []
-      Results = [
-        result stickId 1 95 ] 
-      Duration = Seconds 5<sec>
       Id = 2<id> } ]
   |> fun l ->
     l
@@ -172,3 +172,6 @@ let initialActions =
       | false -> ()
       | true -> raise << Exception <| "Actions has dupped id"
     l
+
+let initialActions = 
+  allActions.[0..1]

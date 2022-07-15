@@ -37,9 +37,10 @@ let update msg (model: App.State.Model) =
                   Inventory = finv; }
               , Cmd.batch [
                 Cmd.ofMsg << App.StateMsg <| App.State.StoreSave 
-                Cmd.ofMsg << App.StateMsg << App.State.StatsChange << Stats.State.RunAction <| (action.Id, diff) ]
+                Cmd.ofMsg << App.StateMsg << App.State.StatsChange << Stats.State.RunAction <| (action.Id, diff) 
+                Cmd.ofMsg << App.StateMsg <| App.State.TestEvents ]
 
-let actionView (inv: Inventory.State) dispatch (action: Action.State.Model) =
+let actionView (inv: Inventory.State.Model) dispatch (action: Action.State.Model) =
   div [ Class "action-item" ] [
     div [ Class "action-item-body" ] [
       h2 [] [ str action.Name ]

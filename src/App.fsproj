@@ -12,8 +12,8 @@
     <Compile Include="Types\Save.fs" />
     <Compile Include="Types\Inventory.fs" />
     <Compile Include="Types\Action.fs" />
-    <Compile Include="Types\Events.fs" />
     <Compile Include="Types\Stats.fs" />
+    <Compile Include="Types\Events.fs" />
     <Compile Include="Types\App.fs" />
     
     <Compile Include="Components\Modal.fs" />

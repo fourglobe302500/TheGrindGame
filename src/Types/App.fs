@@ -25,12 +25,13 @@ module Context =
 [<RequireQualifiedAccess>]
 module State =
   type Model = 
-    { Inventory: Inventory.State 
+    { Inventory: Inventory.State.Model
       Logs: Log list
       Actions: Action.State.Actions
       SaveName: Save.Name
       Time: int<sec> 
-      Stats: Stats.State.Model }
+      Stats: Stats.State.Model
+      Events: Events.Model list }
 
   let init () = 
     { Time = 0<sec>
@@ -38,22 +39,21 @@ module State =
       Actions = Action.initialActions
       Logs = []
       Inventory = { Items = []; MaxCap = 10 } 
-      Stats = Stats.State.init () }
+      Stats = Stats.State.init () 
+      Events = Events.events }
 
   type Msg =
     | StoreSave
     | GetSave
-    | AddItem of Item: Item.Item
-    | RemoveItem of Item: Item.Item
-    | ChangeMaxCapBy of int: int
-    | ChangeMaxCapTo of int: int
     | LoadSave of Json: string
     | ChangeSaveName of SaveName: string
     | WipeSave
     | Log of Msg: string
     | ClearLogs
+    | InventoryChange of Inventory.State.Msg
     | ActionChange of Action.State.Msg
     | StatsChange of Stats.State.Msg
+    | TestEvents
 
 type Model =
   { Context: Context.Model
@@ -62,6 +62,23 @@ type Model =
 type Msg =
   | ContextMsg of Context.Msg
   | StateMsg of State.Msg
+
+[<RequireQualifiedAccess>] 
+module Events =
+  let update model (event: Events.Model) =
+    let rec fold model result =
+      match result with
+      | Events.Compound results ->
+        List.fold fold model results
+      | Events.Msg log ->
+        { model with State = { model.State with Logs = log::model.State.Logs } }
+      | Events.Unlocks id ->
+        let action =
+          Action.allActions
+          |> List.filter ((=) id << Action.State.id)
+        { model with State = { model.State with Actions = model.State.Actions@action } }
+    
+    fold model event.Result
 
 let init () =
   { Context = Context.init ()

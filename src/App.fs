@@ -42,20 +42,6 @@ let update msg (model: App.Model) =
     | App.State.GetSave ->
       let json = localStorage.getItem("save")
       model, Cmd.ofMsg (App.StateMsg <| App.State.LoadSave json)
-    | App.State.AddItem item ->
-      let inventory = model.State.Inventory + item
-      { model with State = { model.State with Inventory = inventory } }, Cmd.none
-    | App.State.RemoveItem item ->
-      let inventory = model.State.Inventory - item
-      { model with State = { model.State with Inventory = inventory } }, Cmd.none
-    | App.State.ChangeMaxCapBy delta ->
-      if delta > 0 then
-        { model with State = { model.State with Inventory = { model.State.Inventory with MaxCap = model.State.Inventory.MaxCap+delta } } }, Cmd.none
-      else model, Cmd.none
-    | App.State.ChangeMaxCapTo maxCap ->
-      if maxCap > 0 then
-        { model with State = { model.State with Inventory = { model.State.Inventory with MaxCap = maxCap } } }, Cmd.none
-      else model, Cmd.none
     | App.State.LoadSave json ->
       if Helpers.notEmpty json then
         let state = Json.parseAs<App.State.Model> json
@@ -79,12 +65,24 @@ let update msg (model: App.Model) =
       { model with State = { model.State with Logs = Message(msg)::model.State.Logs } }, Cmd.ofMsg (App.StateMsg App.State.StoreSave)
     | App.State.ClearLogs ->
       { model with State = { model.State with Logs = [] } }, Cmd.ofMsg (App.StateMsg App.State.StoreSave)
+    | App.State.InventoryChange msg ->
+      let (inv, cmd) = Inventory.update msg model.State.Inventory
+      { model with State = { model.State with Inventory = inv } }, Cmd.map (App.StateMsg) cmd
     | App.State.ActionChange msg ->
       let (state, cmd) = Action.update msg model.State
       { model with State = state }, cmd
     | App.State.StatsChange msg ->
       let (model, cmd) = Stats.update (Stats.StateMsg msg) model
       model, cmd
+    | App.State.TestEvents ->
+      model.State.Events
+      |> List.partition (Events.isMet model.State.Inventory model.State.Stats)
+      |> fun (areMet, arentMet) -> 
+        let model =
+          areMet
+          |> List.fold App.Events.update model
+        { model with State = { model.State with Events = arentMet } }
+        , Cmd.ofMsg << App.StateMsg <| App.State.StoreSave
 
 let view (model: App.Model) (dispatch: Dispatch<App.Msg>) =
   let dispatchContextChange = dispatch << App.ContextMsg
