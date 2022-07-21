@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "App", "src\App.fsproj", "{A42CEDC1-066C-464D-BC8E-D191386A2806}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Web", "src\Web\Web.fsproj", "{A42CEDC1-066C-464D-BC8E-D191386A2806}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Build", "Build.fsproj", "{1B6A1E34-EC88-4A2A-89A2-9184F07733AF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +20,9 @@ Global
 		{A42CEDC1-066C-464D-BC8E-D191386A2806}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A42CEDC1-066C-464D-BC8E-D191386A2806}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A42CEDC1-066C-464D-BC8E-D191386A2806}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B6A1E34-EC88-4A2A-89A2-9184F07733AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B6A1E34-EC88-4A2A-89A2-9184F07733AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B6A1E34-EC88-4A2A-89A2-9184F07733AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B6A1E34-EC88-4A2A-89A2-9184F07733AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

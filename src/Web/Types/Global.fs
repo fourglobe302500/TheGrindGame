@@ -1,5 +1,5 @@
 [<AutoOpen>]
-module TGG.Types
+module TGG.Types.Global
 
 type Result<'s, 'f> =
   | Success of 's
