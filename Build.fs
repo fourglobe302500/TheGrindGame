@@ -27,6 +27,8 @@ Target.create "Run" (fun _ ->
   |> runParallel
 )
 
+Target.create "Deploy" (fun _ -> run yarn "deploy" ".")
+
 open Fake.Core.TargetOperators
 
 let depedencies = [
@@ -37,6 +39,11 @@ let depedencies = [
   "Clean"
     ==> "InstallWeb"
     ==> "Run"
+
+  "Clean"
+    ==> "InstallWeb"
+    ==> "Bundle"
+    ==> "Deploy"
 ]
 
 [<EntryPoint>]

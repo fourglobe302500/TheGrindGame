@@ -5,7 +5,8 @@
   "version": "0.0.6",
   "scripts": {
     "start": "webpack-dev-server --mode development",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "deploy": "gh-pages -d deploy/public"
   },
   "devDependencies": {
     "@babel/core": "^7.18.2",
@@ -17,6 +18,7 @@
     "fable-compiler": "^2.4.13",
     "fable-loader": "^2.1.8",
     "fable-utils": "^1.2.0",
+    "gh-pages": "^4.0.0",
     "html-webpack-plugin": "^5.5.0",
     "mini-css-extract-plugin": "^2.6.1",
     "node-sass": "^7.0.1",
