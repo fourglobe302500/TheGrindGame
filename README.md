@@ -2,4 +2,4 @@
 
 A game about grinding resources
 
-[Play Here](https://the-grind-game.vercel.appp)
+[Play Here](https://fourglobe302500.github.io/thegrindgame/)
