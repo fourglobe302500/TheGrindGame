@@ -17,6 +17,8 @@
     <Compile Include="Types\Stats.fs" />
     <Compile Include="Types\Events.fs" />
     <Compile Include="Types\App.fs" />
+
+    <Compile Include="Parser.fs" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
