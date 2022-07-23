@@ -8,23 +8,29 @@ open Helpers
 initializeContext()
 
 let webPath = Path.getFullName "src/Web"
-let deployPath = Path.getFullName "deploy"
+let corePath = Path.getFullName "src/Core"
+let deployPath = Path.getFullName "deploy/public"
 
 Target.create "Clean" (fun _ ->
-  Shell.cleanDir deployPath
-  run dotnet "fable clean --yes" webPath // Delete *.fs.js files created by Fable
+    Shell.cleanDir deployPath
+    run dotnet "fable clean --yes" webPath // Delete *.fs.js files created by Fable
 )
+
+Target.create "BuildCore" (fun _ -> run dotnet "build" corePath)
 
 Target.create "InstallWeb" (fun _ -> run yarn "install" ".")
 
 Target.create "Bundle" (fun _ ->
-  [ "web", dotnet "fable -o output -s --run yarn build" webPath ]
-  |> runParallel
+    [ "web", dotnet "fable -o output -s --run yarn build" webPath ]
+    |> runParallel
 )
 
 Target.create "Run" (fun _ ->
-  [ "web", dotnet "fable watch -o output -s --run yarn start" webPath ]
-  |> runParallel
+    // Shell.copyFile 
+    //     (Path.combine deployPath "index.html")    
+    //     (Path.combine webPath "index.html") 
+    [ "web", dotnet "fable watch -o output -s --run yarn start" webPath ]
+    |> runParallel
 )
 
 Target.create "Deploy" (fun _ -> run yarn "deploy" ".")
@@ -32,18 +38,21 @@ Target.create "Deploy" (fun _ -> run yarn "deploy" ".")
 open Fake.Core.TargetOperators
 
 let depedencies = [
-  "Clean"
-    ==> "InstallWeb"
-    ==> "Bundle"
+    "Clean"
+        ==> "InstallWeb"
+        ==> "BuildCore"
+        ==> "Bundle"
 
-  "Clean"
-    ==> "InstallWeb"
-    ==> "Run"
+    "Clean"
+        ==> "InstallWeb"
+        ==> "BuildCore"
+        ==> "Run"
 
-  "Clean"
-    ==> "InstallWeb"
-    ==> "Bundle"
-    ==> "Deploy"
+    "Clean"
+        ==> "InstallWeb"
+        ==> "BuildCore"
+        ==> "Bundle"
+        ==> "Deploy"
 ]
 
 [<EntryPoint>]

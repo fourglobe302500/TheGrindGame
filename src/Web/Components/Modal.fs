@@ -1,14 +1,8 @@
 [<RequireQualifiedAccess>]
-module TGG.Components.Modal
+module TGG.Web.Components.Modal
 
-open Fable
-open Fable.Core
 open Fable.React
 open Fable.React.Props
-open Elmish
-open Elmish.React
-open Elmish.ReactNative
-open Fable.Core.JsInterop
 
 let modal show props header body =
   if show then 
