@@ -32,7 +32,6 @@ module.exports = (env, arg) => {
     },
     output: {
       path: resolve(config.outputDir),
-      publicPath: "./",
       filename: isProduction ? "[name].[contenthash].js" : "[name].js",
     },
     mode: mode,
