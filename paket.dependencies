@@ -14,5 +14,3 @@ nuget Elmish
 nuget Fake.Core.Target
 nuget Fake.IO.FileSystem
 nuget Farmer
-
-nuget FParsec

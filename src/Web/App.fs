@@ -17,6 +17,7 @@ open Elmish.Debug
 
 open TGG.Web.Components
 open TGG.Core.Types
+open TGG.Core.Compiling
 
 importAll "./App.scss"
 
@@ -72,6 +73,15 @@ let handle msg model: App.Model * Cmd<App.Msg> =
             Cmd.batch <| [
                 Cmd.ofMsg << App.Local <| App.StoreSave
                 Cmd.ofMsg << App.SaveChange <| Save.AskSaveToogle ]
+
+"run action test ignores Pebble"
+|> Parser.parse
+|> function
+| Global.Failure f -> printfn "%s" f
+| Global.Success tokens ->
+List.map (sprintf "%O") tokens
+|> List.toArray
+|> fun l -> console.log(l)
 
 Program.mkProgram App.init (App.update handle) view
 |> Program.withReactBatched "elmish-app"

@@ -1,10 +1,10 @@
-[<AutoOpen>]
-module TGG.Core.Types.Global
+namespace TGG.Core.Types
 
-type Result<'s, 'f> =
-    | Success of 's
-    | Failure of 'f
-
+[<RequireQualifiedAccess>]
+module Global =
+    type Result<'s, 'f> =
+        | Success of 's
+        | Failure of 'f
 
 [<RequireQualifiedAccess>]
 module Log =
