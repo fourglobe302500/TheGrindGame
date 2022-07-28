@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Helpers.fs" />
+
+    <Compile Include="Types\Global.fs" />
+    <Compile Include="Types\Item.fs" />
+    <Compile Include="Types\Time.fs" />
+    <Compile Include="Types\Save.fs" />
+    <Compile Include="Types\Inventory.fs" />
+    <Compile Include="Types\Action.fs" />
+    <Compile Include="Types\Stats.fs" />
+    <Compile Include="Types\Events.fs" />
+    <Compile Include="Types\App.fs" />
+
+    <Compile Include="Compiling\Lexer.fs" />
+    <Compile Include="Compiling\Parser.fs" />
+  </ItemGroup>
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
+</Project>

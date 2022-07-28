@@ -1,5 +1,5 @@
 [<RequireQualifiedAccess>]
-module TGG.Helpers
+module TGG.Web.Helpers
 
 open Fable.SimpleJson
 open Fable.Core.Util
@@ -41,13 +41,3 @@ let (|ParseJsonArray|_|) mapper json =
   | (JArray l) -> 
     parseJsonArray mapper l
   | _ -> None
-
-let inList a = [ a ]
-
-let prettyItemsLog (label: string) l (map: 'a -> 'b) = 
-  let a =
-    l
-    |> List.map map
-    |> List.toArray
-  
-  console.log(label, a)

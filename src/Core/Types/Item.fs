@@ -1,7 +1,7 @@
 [<RequireQualifiedAccess>]
-module TGG.Types.Item
+module TGG.Core.Types.Item
 
-open TGG
+open TGG.Core
 
 [<Measure>] type id
 
@@ -14,16 +14,16 @@ let getString = get >> fst
 let getId = get >> snd
 
 let items = 
-  [ Item ("Pebble", 0<id>)
-    Item ("Stick", 1<id>) ]
+    [ Item ("Pebble", 0<id>)
+      Item ("Stick", 1<id>) ]
 
 let fromString str items = 
-  items
-  |> List.find (getString >> (=) str)
+    items
+    |> List.find (getString >> (=) str)
 
 let fromId id items=
-  items
-  |> List.find (getId >> (=) id)
+    items
+    |> List.find (getId >> (=) id)
 
 let fromIdToString items id = fromId id items |> getString
 
@@ -33,13 +33,13 @@ type Amount = ItemAmount of itemId: int<id> * count: int
 
 [<RequireQualifiedAccess>]
 module Amount =
-  let get = function ItemAmount (item, count) -> item,count
+    let get = function ItemAmount (item, count) -> item,count
 
 type Requirement = ItemRequirement of Amount
 
 [<RequireQualifiedAccess>]
 module Requirement =
-  let get = function ItemRequirement a -> Amount.get a
+    let get = function ItemRequirement a -> Amount.get a
 
 [<Measure>] type percent
 
@@ -47,20 +47,20 @@ type Result = ItemResult of Amount: Amount * Chance: float<percent>
 
 [<RequireQualifiedAccess>]
 module Result =
-  let get = function 
+    let get = function 
     | ItemResult (a, chance) -> 
-      let (item, count) = Amount.get a
-      item, count, chance
+    let (item, count) = Amount.get a
+    item, count, chance
 
 
 type Slot = ItemSlot of Item: Item * Count: int
 
 [<RequireQualifiedAccess>]
 module Slot =
-  let get = function ItemSlot(item, count) -> item, count
+    let get = function ItemSlot(item, count) -> item, count
 
-  let prettyPrintList label l =
-    let map = get >> fun (item, count) -> (item, count) 
+    let prettyPrintList log label l =
+        let map = get >> fun (item, count) -> (item, count) 
 
-    Helpers.prettyItemsLog label l map
+        Helpers.prettyItemsLog log label l map
 

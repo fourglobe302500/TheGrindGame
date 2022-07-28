@@ -3,28 +3,28 @@
 // https://github.com/fable-compiler/webpack-config-template
 
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const CopyWebPackPlugin = require('copy-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyWebPackPlugin = require("copy-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
 
-const resolve = filePath => 
-  path.isAbsolute(filePath) ? filePath : path.join(__dirname, filePath)
+const resolve = (filePath) =>
+  path.isAbsolute(filePath) ? filePath : path.join(__dirname, filePath);
 
 const CONFIG = {
   // The tags to include the generated JS and CSS will be automatically injected in the HTML template
   // See https://github.com/jantimon/html-webpack-plugin
-  indexHtmlTemplate: './src/Web/index.html',
-  fsharpEntry: './src/Web/output/App.js',
-  outputDir: './deploy/public',
-  assetsDir: './src/Web/public',
+  indexHtmlTemplate: "./src/Web/index.html",
+  fsharpEntry: "./src/Web/output/App.js",
+  outputDir: "./deploy/public",
+  assetsDir: "./src/Web/public",
   devServerPort: 8080,
-}
+};
 
 module.exports = (env, arg) => {
-  const mode = arg.mode ?? 'development'
+  const mode = arg.mode ?? "development";
 
-  const config = CONFIG
-  const isProduction = mode === 'production'
+  const config = CONFIG;
+  const isProduction = mode === "production";
 
   return {
     entry: {
@@ -32,25 +32,37 @@ module.exports = (env, arg) => {
     },
     output: {
       path: resolve(config.outputDir),
-      publicPath: './',
       filename: isProduction ? "[name].[contenthash].js" : "[name].js",
     },
     mode: mode,
     plugins: [
-      isProduction && new MiniCssExtractPlugin({ filename: 'style.[name].[contenthash].css' }),
-      isProduction && new CopyWebPackPlugin({ patterns: [{ from: resolve(config.assetsDir) }] }),
+      isProduction &&
+        new MiniCssExtractPlugin({
+          filename: "style.[name].[contenthash].css",
+        }),
+      isProduction &&
+        new CopyWebPackPlugin({
+          patterns: [{ from: resolve(config.assetsDir) }],
+        }),
 
-      new HtmlWebpackPlugin({ filename: 'index.html', template: resolve(config.indexHtmlTemplate)})
+      new HtmlWebpackPlugin({
+        filename: "index.html",
+        template: resolve(config.indexHtmlTemplate),
+      }),
     ].filter(Boolean),
     devServer: {
-      static: {
-        directory: resolve(config.assetsDir),
-        publicPath: '/'
-      },
-      host: '0.0.0.0',
+      static: [
+        {
+          directory: resolve(config.outputDir),
+        },
+        {
+          directory: resolve(config.assetsDir),
+        },
+      ],
+      host: "0.0.0.0",
       port: config.devServerPort,
       hot: true,
-      historyApiFallback: true
+      historyApiFallback: true,
     },
     module: {
       rules: [
@@ -116,11 +128,10 @@ module.exports = (env, arg) => {
         },
         {
           test: /\.js$/,
-          enforce: 'pre',
-          use: ['source-map-loader'],
-        }
+          enforce: "pre",
+          use: ["source-map-loader"],
+        },
       ],
     },
-  }
+  };
 };
-
