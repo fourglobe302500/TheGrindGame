@@ -39,6 +39,22 @@ type Token =
 | String of string
 | ParsedNumber of int
 
+// Keywords
+| Loop          // loop
+| While         // while
+| If            // if
+| Else          // else
+| Run           // run
+| Ignores       // ignores
+| Can           // can
+| True          // true
+| False         // false
+| Action        // action
+| Inventory     // inventory
+| Item          // item
+| Automation    // automation
+
+[<RequireQualifiedAccess>]
 module Token =
     let getString = function
         | Quote ->         "'"
@@ -59,12 +75,41 @@ module Token =
         | Equal ->         "="
         | Less ->          "<"
         | More ->          ">"
+        | Loop ->          "loop"
+        | While ->         "while"
+        | If ->            "if"
+        | Else ->          "else"
+        | Run ->           "run"
+        | Ignores ->       "ignores"
+        | Can ->           "can"
+        | True ->          "true"
+        | False ->         "false"
+        | Action ->        "action"
+        | Inventory ->     "inventory"
+        | Item ->          "item"
+        | Automation ->    "automation"
         | WS v -> string v
         | Letter v -> string v
         | Number v -> string v
         | Char v -> string v
         | String v -> v
         | ParsedNumber v -> string v
+    
+    let (|IsKeyword|_|) text =
+        match text with
+        | "while" -> Some While         
+        | "if" -> Some If            
+        | "else" -> Some Else          
+        | "run" -> Some Run           
+        | "ignores" -> Some Ignores       
+        | "can" -> Some Can           
+        | "true" -> Some True          
+        | "false" -> Some False         
+        | "action" -> Some Action        
+        | "inventory" -> Some Inventory     
+        | "item" -> Some Item          
+        | "automation" -> Some Automation    
+        | _ -> None
 
 let lexer c =
     match c with
@@ -111,8 +156,11 @@ let batch tokens =
         | Success result ->
         match state, token with
         // pass through
-        | s, ParsedNumber _ 
-        | s, String _ 
+        | s, ParsedNumber _ | s, String _ | s, Loop
+        | s, While | s, If | s, Else
+        | s, Run | s, Ignores | s, Can
+        | s, True | s, False | s, Action
+        | s, Inventory | s, Item | s, Automation
             -> (Success result), s
 
         // operators with blank
@@ -296,8 +344,17 @@ let batch tokens =
     | Success _, OnQuote _ -> Failure <| "Unfinished quoted string"
     | Failure f, _ -> Failure f
 
+let bindKeywords tokens =
+    let toKey token = 
+        match token with
+        | String (Token.IsKeyword key) ->
+            key
+        | token -> token
+    tokens
+    |> List.map toKey
 
 let lex (s: string) =
     List.ofSeq s
     |> List.map lexer
     |> batch
+    |>> bindKeywords
