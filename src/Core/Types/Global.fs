@@ -1,10 +1,23 @@
 namespace TGG.Core.Types
 
-[<RequireQualifiedAccess>]
+[<AutoOpen>]
 module Global =
     type Result<'s, 'f> =
         | Success of 's
         | Failure of 'f
+
+    [<RequireQualifiedAccess>]
+    module Result =
+        let bind f v =
+            match v with
+            | Failure f -> Failure f
+            | Success s -> f s
+
+        let map f v = bind <| (f >> Success) <| v
+
+    let (|>>) v f = Result.map f v
+
+    let (|=>) v f = Result.bind f v
 
 [<RequireQualifiedAccess>]
 module Log =
