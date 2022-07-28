@@ -13,6 +13,8 @@ type Token =
 | CloseParen    // )
 | OpenBrace     // [
 | CloseBrace    // ]
+| OpenBracket   // {
+| CloseBracket  // }
 
 // Operators
 | Plus          // +
@@ -64,6 +66,8 @@ module Token =
         | CloseParen ->    ")"
         | OpenBrace ->     "["
         | CloseBrace ->    "]"
+        | OpenBracket ->   "{"
+        | CloseBracket ->  "}"
         | Plus ->          "+"
         | Minus ->         "-"
         | Star ->          "*"
@@ -169,6 +173,8 @@ let batch tokens =
         | Blank, (CloseParen as token) 
         | Blank, (OpenBrace as token) 
         | Blank, (CloseBrace as token) 
+        | Blank, (OpenBracket as token)
+        | Blank, (CloseBracket as token)
         | Blank, (Plus as token) 
         | Blank, (Minus as token) 
         | Blank, (Star as token) 
@@ -226,6 +232,8 @@ let batch tokens =
         | Normal s, (CloseParen as token) 
         | Normal s, (OpenBrace as token) 
         | Normal s, (CloseBrace as token) 
+        | Normal s, (OpenBracket as token) 
+        | Normal s, (CloseBracket as token) 
         | Normal s, (Plus as token) 
         | Normal s, (Minus as token) 
         | Normal s, (Star as token) 
@@ -244,15 +252,13 @@ let batch tokens =
         | OnQuote(s, double, false), (Char _ as t)
         | OnQuote(s, double, _), (Token.Number _ as t)
         | OnQuote(s, double, _), (WS _ as t)
-        | OnQuote(s, double, _), (OpenBrace as t)
-        | OnQuote(s, double, _), (OpenParen as t)
-        | OnQuote(s, double, _), (CloseBrace as t)
-        | OnQuote(s, double, _), (CloseParen as t)
         | OnQuote(s, double, true), (BackSlash as t) 
         | OnQuote(s, double, _), (OpenParen as t) 
         | OnQuote(s, double, _), (CloseParen as t) 
         | OnQuote(s, double, _), (OpenBrace as t) 
         | OnQuote(s, double, _), (CloseBrace as t) 
+        | OnQuote(s, double, _), (OpenBracket as t) 
+        | OnQuote(s, double, _), (CloseBracket as t) 
         | OnQuote(s, double, _), (Plus as t) 
         | OnQuote(s, double, _), (Minus as t) 
         | OnQuote(s, double, _), (Star as t) 
@@ -313,15 +319,13 @@ let batch tokens =
         | Number n, WS _ -> Success << head result << ParsedNumber <| int n, Blank
 
         // ending number with operation
-        | Number n, (OpenBrace as t)
         | Number n, (OpenParen as t)
-        | Number n, (CloseBrace as t)
         | Number n, (CloseParen as t)
+        | Number n, (OpenBrace as t)
+        | Number n, (CloseBrace as t)
+        | Number n, (OpenBracket as t)
+        | Number n, (CloseBracket as t)
         | Number n, (BackSlash as t) 
-        | Number n, (OpenParen as t) 
-        | Number n, (CloseParen as t) 
-        | Number n, (OpenBrace as t) 
-        | Number n, (CloseBrace as t) 
         | Number n, (Plus as t) 
         | Number n, (Minus as t) 
         | Number n, (Star as t) 
